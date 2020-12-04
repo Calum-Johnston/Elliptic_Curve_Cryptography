@@ -82,13 +82,9 @@ public class Main {
         System.out.println("Binary finite field:");
         System.out.println("Addition: " + (m.xor(n)).equals(addition2));
         System.out.println("Subtraction: " + (m.xor(n)).equals(subtraction2));
-        System.out.println("Multiplication: " + (BaseOperations.multiple(m, n, p, degree)).equals(multiplication2));
-        System.out.println("Division: " + division2);
-        System.out.println("Multiplicative Inverse: " + multiplicativeInverse2);
-
-        int[] a = new int[] {0,0,1,0,1,1,0,0,0,1,0,1,0,1,1,1,0,1,0,0,0,1,1};
-        int[] b = new int[] {1,0,0,1,0,1};
-        BaseOperations.getQandR(a, b);
+        System.out.println("Multiplication: " + (BinaryField_Operations.multiple(m, n, p, degree)).equals(multiplication2));
+        System.out.println("Division: " + BinaryField_Operations.division(m,n,p, degree).equals(division2));
+        System.out.println("Multiplicative Inverse: " + BinaryField_Operations.multiplicativeInverse(m,p, degree).equals(multiplicativeInverse2));
     }
 
 }
