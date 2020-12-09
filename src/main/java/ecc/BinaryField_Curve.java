@@ -1,5 +1,6 @@
 package ecc;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -28,7 +29,11 @@ public class BinaryField_Curve {
 
     // Addition
     public BigInteger add(BigInteger a, BigInteger b) {
-        return a.xor(b);
+        BigInteger temp = a.xor(b);
+        if(temp.compareTo(f) == 1){
+            return temp.xor(f);
+        }
+        return temp;
     }
 
     // Multiplication
@@ -52,24 +57,44 @@ public class BinaryField_Curve {
     // Division
     public BigInteger divide(BigInteger a, BigInteger b){
         BigInteger multiplicativeInverse_b = multiplicativeInverse(b);
+        BigInteger test = multiple(b, multiplicativeInverse_b);
         BigInteger result = multiple(a, multiplicativeInverse_b);
         return result;
     }
 
-    // Multiplication for MI calculation
-    private BigInteger multiple2(BigInteger a, BigInteger b){
-        BigInteger result = new BigInteger("0");
-        for(int i = 0; i < b.bitLength() ; i++){
-            if(b.testBit(i)){
-                result = result.xor(a);
+    // Multiplicative Inverse
+    public BigInteger multiplicativeInverse(BigInteger x){
+        BigInteger s = this.f;
+        BigInteger v= BigInteger.ZERO;
+        BigInteger r = x;
+        BigInteger u = BigInteger.ONE;
+        while(degree(r) != 0){
+            int dif = degree(s) - degree(r);
+            if(dif < 0){
+                BigInteger temp = s;
+                s = r;
+                r = temp;
+                temp = v;
+                v = u;
+                u = temp;
+                dif = -dif;
             }
-            a = a.shiftLeft(1);
+            BigInteger poly = BigDecimal.valueOf(Math.pow(2, dif)).toBigInteger();
+            s = add(s, multiple(poly, r));
+            v = add(v, multiple(poly, u));
         }
-        return result;
+        return u;
     }
 
-    // Multiplicative Inverse
-    private BigInteger multiplicativeInverse(BigInteger x){
+    public int degree(BigInteger x){
+        String temp = x.toString(2);
+        return temp.length() - 1;
+    }
+
+    /**public BigInteger m(BigInteger x){
+        if(x.equals(BigInteger.ONE)){
+            return BigInteger.ONE;
+        }
         BigInteger[] row1 = new BigInteger[3];
         BigInteger[] row2 = new BigInteger[3];
         BigInteger[] temp = new BigInteger[3];
@@ -78,16 +103,15 @@ public class BinaryField_Curve {
         temp[0] = BigInteger.ZERO; temp[1] = BigInteger.ZERO; temp[2] = BigInteger.ZERO;
         while(!(temp[0].equals(BigInteger.ONE))) {
             BigInteger q = getQandR(row1[0], row2[0]).getQ();
-            temp[0] = row1[0].xor(multiple2(q, row2[0]));
-            temp[1] = row1[1].xor(multiple2(q, row2[1]));
-            temp[2] = row1[2].xor(multiple2(q, row2[2]));
+            temp[0] = add(row1[0], multiple(q, row2[0]));
+            temp[1] = add(row1[1], multiple(q, row2[1]));
+            temp[2] = add(row1[2], multiple(q, row2[2]));
             row1 = Arrays.copyOf(row2,3);
             row2 = Arrays.copyOf(temp, 3);
         }
         return temp[1];
     }
 
-    // Quotient and remainder
     private QR getQandR(BigInteger a1, BigInteger b1){
         int[] a = new int[a1.bitLength()];
         int[] b = new int[b1.bitLength()];
@@ -127,9 +151,12 @@ public class BinaryField_Curve {
         for(int i = a.length - aLength; i < a.length; i++){
             temp += a[i];
         }
+        if(temp.length() == 0){
+            temp = "0";
+        }
         BigInteger r = new BigInteger(temp, 2);
         return new QR(q, r);
-    }
+    }*/
 
 
     // Getters and setters

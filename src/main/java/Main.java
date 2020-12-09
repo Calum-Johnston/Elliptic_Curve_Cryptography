@@ -2,6 +2,7 @@ import ecc.*;
 import rsa.RSA;
 import rsa.RSA_Key;
 
+
 import java.math.BigInteger;
 
 public class Main {
@@ -22,9 +23,8 @@ public class Main {
         System.out.println("Division: " + (x.multiply(y.modInverse(prime))).mod(prime).equals(division));
 
         // Testing for binary finite field arithmetic
-        BigInteger p = new BigInteger("800000000000000000000000000000000000000C9", 16);
-        BigInteger m = new BigInteger("2fe13c0537bbc11acaa07d793de4e6d5e5c94eee8", 16);
-        BigInteger n = new BigInteger("289070fb05d38ff58321f2e800536d538ccdaa3d9", 16);
+        BinaryField_Curve curve = generateBinaryFieldCurve();
+        BinaryField_Point point = curve.getG();
         int degree = 163;
         BigInteger addition2 = new BigInteger("7714cfe32684eef49818f913db78b866904e4d31", 16);
         BigInteger subtraction2 = new BigInteger("7714cfe32684eef49818f913db78b866904e4d31", 16);
@@ -32,50 +32,45 @@ public class Main {
         BigInteger division2 = new BigInteger("498d03bb544d83614e0b5963052f604eb8ec8d0cd", 16);
         BigInteger multiplicativeInverse2 = new BigInteger("63f514f39f4587684f96c8dd6558e69339a1efed9", 16);
         System.out.println("Binary finite field:");
-        System.out.println("Addition: " + (m.xor(n)).equals(addition2));
-        System.out.println("Subtraction: " + (m.xor(n)).equals(subtraction2));
-        System.out.println("Multiplication: " + (BinaryField_Operations.multiple(m, n, p, degree)).equals(multiplication2));
-        System.out.println("Division: " + BinaryField_Operations.division(m,n,p, degree).equals(division2));
-        System.out.println("Multiplicative Inverse: " + BinaryField_Operations.multiplicativeInverse(m,p, degree).equals(multiplicativeInverse2));
+        System.out.println("Addition: " + (curve.add(point.getX(), point.getY()).equals(addition2)));
+        System.out.println("Subtraction: " + (curve.add(point.getX(), point.getY())).equals(subtraction2));
+        System.out.println("Multiplication: " + (curve.multiple(point.getX(), point.getY())).equals(multiplication2));
+        System.out.println("Division: " + curve.divide(point.getX(), point.getY()).equals(division2));
+        System.out.println("Multiplicative Inverse: " + curve.multiplicativeInverse(point.getX()).equals(multiplicativeInverse2));
     }
 
     public void test_PrimeFieldCurve(){
         String message = "Alisha Jane Walsh";
         ECC_Curve curve = generatePrimeFieldCurve();
-        ECC_Key keyPairECC = new ECC_Key(curve);
-        ECC_Signature sig = ECDSA.Sign(curve, keyPairECC, message);
-        Boolean valid = ECDSA.Verify(curve, sig, keyPairECC, message);
-        System.out.println(valid);
 
-        ECC_Key keyPairECC2 = new ECC_Key(curve);
-        BigInteger sharedSecret = ECDH.computeSecret(curve, keyPairECC.getPublicKey(), keyPairECC2.getPrivateKey());
-        BigInteger sharedSecret2 = ECDH.computeSecret(curve, keyPairECC2.getPublicKey(), keyPairECC.getPrivateKey());
-        System.out.println(sharedSecret.equals(sharedSecret2));
+        // Generate key pair
+        ECC_Key k1 = new ECC_Key(curve);
+        ECC_Key k2 = new ECC_Key(curve);
 
-        RSA_Key keyPairRSA = new RSA_Key(2048);
-        BigInteger s = RSA.Sign(message, keyPairRSA.getPrivateKey(), keyPairRSA.getN());
-        Boolean valid2 = RSA.Verify(message, s, keyPairRSA.getPublicKey(), keyPairRSA.getN());
-        System.out.println(valid);
+        // ECDSA
+        ECC_Signature sig = ECDSA.Sign(curve, k1, message);
+        Boolean valid = ECDSA.Verify(curve, sig, k1, message);
+
+        // ECDH
+        BigInteger sharedSecret = ECDH.computeSecret(curve, k1.getPublicKey(), k2.getPrivateKey());
+        BigInteger sharedSecret2 = ECDH.computeSecret(curve, k2.getPublicKey(), k1.getPrivateKey());
         return;
     }
 
     public void test_BinaryFieldCurve(){
         String message = "Alisha Jane Walsh";
-        BinaryField_Curve  curve = generateBinaryFieldCurve();
-        BinaryField_Point point = new BinaryField_Point(curve, new BigInteger("1001", 2), new BigInteger("1001", 2));
-        point.pointMultiplication(BigInteger.TWO);
+        BinaryField_Curve curve = generateBinaryFieldCurve();
 
         // Generate key pair
-        BinaryECC_Key k1 = new BinaryECC_Key(curve);
-        BinaryECC_Key k2 = new BinaryECC_Key(curve);
+        BinaryECC_Key k1 = new BinaryECC_Key(curve, new BigInteger("3"));
+        BinaryECC_Key k2 = new BinaryECC_Key(curve, new BigInteger("2"));
 
-        BinaryField_Point sharedK = k1.getPublicKey().pointMultiplication(k2.getPrivateKey());
-        BinaryField_Point sharedK1 = k2.getPublicKey().pointMultiplication(k1.getPrivateKey());
+        // ECDSA
 
-        // One of Point addition, Point doubling and key generation doesn't work currently
-        // Need to identify which one
 
-        int a = 2;
+        // ECDH
+        BigInteger sharedSecret = ECDH.computeSecret(curve, k1.getPublicKey(), k2.getPrivateKey());
+        BigInteger sharedSecret2 = ECDH.computeSecret(curve, k2.getPublicKey(), k1.getPrivateKey());
     }
 
     // Potential Curves https://tools.ietf.org/html/rfc5639
@@ -92,22 +87,27 @@ public class Main {
 
     // Potential curves: https://www.secg.org/SEC2-Ver-1.0.pdf
     public BinaryField_Curve generateBinaryFieldCurve(){
-        int degree = 113;
-        String f = "80000000000000000000000201";
-        String a = "003088250CA6E7C7FE649CE85820F7";
-        String b = "00E8BEE4D3E2260744188BE0E9C723";
-        String x = "04009D73616F35F4AB1407D73562C1";
-        String y = "0F00A52830277958EE84D1315ED31886";
-        String n = "0100000000000000D9CCEC8A39E56F";
+        int degree = 163;
+        String f = "800000000000000000000000000000000000000C9";
+        String a = "1";
+        String b = "1";
+        String x = "2fe13c0537bbc11acaa07d793de4e6d5e5c94eee8";
+        String y = "289070fb05d38ff58321f2e800536d538ccdaa3d9";
+        String n = "4000000000000000000020108A2E0CC0D99F8A5EF";
         String h = "2";
         return new BinaryField_Curve(degree, f, a, b, x, y, n, h);
     }
 
     public static void main(String[] args){
         Main main = new Main();
+        main.test_Operations();
         main.test_BinaryFieldCurve();
+        main.test_PrimeFieldCurve();
 
-
+        String message = "asda";
+        RSA_Key keyPairRSA = new RSA_Key(2048);
+        BigInteger s = RSA.Sign(message, keyPairRSA.getPrivateKey(), keyPairRSA.getN());
+        Boolean valid2 = RSA.Verify(message, s, keyPairRSA.getPublicKey(), keyPairRSA.getN());
     }
 
 }

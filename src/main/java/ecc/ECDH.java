@@ -9,4 +9,9 @@ public class ECDH {
         return sharedK.getX();
     }
 
+    public static BigInteger computeSecret(BinaryField_Curve curve, BinaryField_Point pubK, BigInteger priK){
+        BinaryField_Point sharedK = pubK.pointMultiplication(priK);
+        return sharedK.getX();
+    }
+
 }
