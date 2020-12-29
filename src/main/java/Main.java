@@ -25,7 +25,6 @@ public class Main {
         // Testing for binary finite field arithmetic
         BinaryField_Curve curve = generateBinaryFieldCurve();
         BinaryField_Point point = curve.getG();
-        int degree = 163;
         BigInteger addition2 = new BigInteger("7714cfe32684eef49818f913db78b866904e4d31", 16);
         BigInteger subtraction2 = new BigInteger("7714cfe32684eef49818f913db78b866904e4d31", 16);
         BigInteger multiplication2 = new BigInteger("4d741872162b253d5a381f1f680b47e5c0ad3aa2a", 16);
@@ -65,8 +64,9 @@ public class Main {
         BinaryECC_Key k1 = new BinaryECC_Key(curve, new BigInteger("3"));
         BinaryECC_Key k2 = new BinaryECC_Key(curve, new BigInteger("2"));
 
-        // ECDSA
-
+        // ECDSA (doesn't work because of mod n!)
+        ECC_Signature sig = ECDSA.Sign(curve, k1, message);
+        Boolean valid = ECDSA.Verify(curve, sig, k1, message);
 
         // ECDH
         BigInteger sharedSecret = ECDH.computeSecret(curve, k1.getPublicKey(), k2.getPrivateKey());

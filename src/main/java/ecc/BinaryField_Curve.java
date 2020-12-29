@@ -2,7 +2,6 @@ package ecc;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
 
 public class BinaryField_Curve {
 
@@ -90,73 +89,6 @@ public class BinaryField_Curve {
         String temp = x.toString(2);
         return temp.length() - 1;
     }
-
-    /**public BigInteger m(BigInteger x){
-        if(x.equals(BigInteger.ONE)){
-            return BigInteger.ONE;
-        }
-        BigInteger[] row1 = new BigInteger[3];
-        BigInteger[] row2 = new BigInteger[3];
-        BigInteger[] temp = new BigInteger[3];
-        row1[0] = f; row1[1] = BigInteger.ZERO; row1[2] = BigInteger.ONE;
-        row2[0] = x; row2[1] = BigInteger.ONE; row2[2] = BigInteger.ZERO;
-        temp[0] = BigInteger.ZERO; temp[1] = BigInteger.ZERO; temp[2] = BigInteger.ZERO;
-        while(!(temp[0].equals(BigInteger.ONE))) {
-            BigInteger q = getQandR(row1[0], row2[0]).getQ();
-            temp[0] = add(row1[0], multiple(q, row2[0]));
-            temp[1] = add(row1[1], multiple(q, row2[1]));
-            temp[2] = add(row1[2], multiple(q, row2[2]));
-            row1 = Arrays.copyOf(row2,3);
-            row2 = Arrays.copyOf(temp, 3);
-        }
-        return temp[1];
-    }
-
-    private QR getQandR(BigInteger a1, BigInteger b1){
-        int[] a = new int[a1.bitLength()];
-        int[] b = new int[b1.bitLength()];
-        String a2 = a1.toString(2);
-        String b2 = b1.toString(2);
-        for(int i = 0; i < a2.length(); i++){
-            a[i] = Character.getNumericValue(a2.charAt(i));
-        }
-        for(int i = 0; i < b2.length(); i++){
-            b[i] = Character.getNumericValue(b2.charAt(i));
-        }
-        String result = "";
-        int aLength = a.length;
-        int bLength = b.length;
-        int aPointer = 0;
-        while(bLength <= aLength && aLength > 0){
-            if(a[aPointer] == 1) {
-                aPointer++; aLength -= 1;
-                for (int j = 0; j < b.length - 1; j++) {
-                    a[j + aPointer] = a[j + aPointer] ^ b[j + 1];
-                }
-                result += "1";
-            }
-            else{
-                aPointer++; aLength -= 1;
-                for (int j = 0; j < b.length - 1; j++) {
-                    a[j + aPointer] = a[j + aPointer] ^ 0;
-                }
-                result += "0";
-            }
-        }
-        if (result == "") {
-            result ="0";
-        }
-        BigInteger q = new BigInteger(result, 2);
-        String temp = "";
-        for(int i = a.length - aLength; i < a.length; i++){
-            temp += a[i];
-        }
-        if(temp.length() == 0){
-            temp = "0";
-        }
-        BigInteger r = new BigInteger(temp, 2);
-        return new QR(q, r);
-    }*/
 
 
     // Getters and setters
