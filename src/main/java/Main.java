@@ -49,11 +49,12 @@ public class Main {
         // ECDSA
         ECC_Signature sig = ECDSA.Sign(curve, k1, message);
         Boolean valid = ECDSA.Verify(curve, sig, k1, message);
+        System.out.println("Prime field ECDSA: " + valid);
 
         // ECDH
         BigInteger sharedSecret = ECDH.computeSecret(curve, k1.getPublicKey(), k2.getPrivateKey());
         BigInteger sharedSecret2 = ECDH.computeSecret(curve, k2.getPublicKey(), k1.getPrivateKey());
-        return;
+        System.out.println("Prime field ECDH: " + sharedSecret.equals(sharedSecret2));
     }
 
     public void test_BinaryFieldCurve(){
@@ -61,16 +62,84 @@ public class Main {
         BinaryField_Curve curve = generateBinaryFieldCurve();
 
         // Generate key pair
-        BinaryECC_Key k1 = new BinaryECC_Key(curve, new BigInteger("3"));
-        BinaryECC_Key k2 = new BinaryECC_Key(curve, new BigInteger("2"));
+        BinaryECC_Key k1 = new BinaryECC_Key(curve);
+        BinaryECC_Key k2 = new BinaryECC_Key(curve);
 
         // ECDSA (doesn't work because of mod n!)
         ECC_Signature sig = ECDSA.Sign(curve, k1, message);
         Boolean valid = ECDSA.Verify(curve, sig, k1, message);
+        System.out.println("Binary field ECDSA: " + valid);
 
         // ECDH
         BigInteger sharedSecret = ECDH.computeSecret(curve, k1.getPublicKey(), k2.getPrivateKey());
         BigInteger sharedSecret2 = ECDH.computeSecret(curve, k2.getPublicKey(), k1.getPrivateKey());
+        System.out.println("Binary field ECDH: " + sharedSecret.equals(sharedSecret2));
+    }
+
+    public void compareSpeeds(){
+        long startTime;
+        long endTime;
+        long duration;
+
+        // Initialise
+        BigInteger prime = new BigInteger("6277101735386680763835789423207666416083908700390324961279");
+        BigInteger x = new BigInteger("188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012", 16);
+        BigInteger y = new BigInteger("07192b95ffc8da78631011ed6b24cdd573f977a11e794811", 16);
+        BinaryField_Curve curve = generateBinaryFieldCurve();
+        BinaryField_Point point = curve.getG();
+
+        // Addition
+        startTime = System.nanoTime();
+        x.subtract(y).mod(prime);
+        endTime = System.nanoTime();
+        System.out.println("Prime subtraction: " + (endTime - startTime));
+        startTime = System.nanoTime();
+        curve.add(point.getX(), point.getY());
+        endTime = System.nanoTime();
+        System.out.println("Binary subtraction: " + (endTime - startTime));
+
+        // Subtraction
+        startTime = System.nanoTime();
+        x.add(y).mod(prime);
+        endTime = System.nanoTime();
+        System.out.println("Prime addition: " + (endTime - startTime));
+        startTime = System.nanoTime();
+        curve.add(point.getX(), point.getY());
+        endTime = System.nanoTime();
+        System.out.println("Binary addition: " + (endTime - startTime));
+
+        // Multiplication
+        startTime = System.nanoTime();
+        x.multiply(y).mod(prime);
+        endTime = System.nanoTime();
+        System.out.println("Prime multiplication: " + (endTime - startTime));
+        startTime = System.nanoTime();
+        curve.add(point.getX(), point.getY());
+        endTime = System.nanoTime();
+        System.out.println("Binary multiplication: " + (endTime - startTime));
+
+        // Division
+        startTime = System.nanoTime();
+        x.multiply(y.modInverse(prime)).mod(prime);
+        endTime = System.nanoTime();
+        System.out.println("Prime division: " + (endTime - startTime));
+        startTime = System.nanoTime();
+        curve.divide(point.getX(), point.getY());
+        endTime = System.nanoTime();
+        System.out.println("Binary division: " + (endTime - startTime));
+
+        // MI
+        startTime = System.nanoTime();
+        y.modInverse(prime);
+        System.out.println(y);
+        endTime = System.nanoTime();
+        System.out.println("Prime MI: " + (endTime - startTime));
+        startTime = System.nanoTime();
+        curve.multiplicativeInverse(point.getX());
+        System.out.println(point.getX());
+        endTime = System.nanoTime();
+        System.out.println("Binary MI: " + (endTime - startTime));
+
     }
 
     // Potential Curves https://tools.ietf.org/html/rfc5639
@@ -98,16 +167,29 @@ public class Main {
         return new BinaryField_Curve(degree, f, a, b, x, y, n, h);
     }
 
+    public BinaryField_Curve generateBinaryFieldCurve2(){
+        int degree = 4;
+        String f = "13";
+        String a = "3";
+        String b = "1";
+        String x = "F";
+        String y = "F";
+        String n = "10";
+        String h = "1";
+
+        // 16 points on the curve
+        // n = h * l
+        // l = order of generator
+        // h = cofactor
+
+        return new BinaryField_Curve(degree, f, a, b, x, y, n, h);
+    }
+
     public static void main(String[] args){
         Main main = new Main();
         main.test_Operations();
         main.test_BinaryFieldCurve();
         main.test_PrimeFieldCurve();
-
-        String message = "asda";
-        RSA_Key keyPairRSA = new RSA_Key(2048);
-        BigInteger s = RSA.Sign(message, keyPairRSA.getPrivateKey(), keyPairRSA.getN());
-        Boolean valid2 = RSA.Verify(message, s, keyPairRSA.getPublicKey(), keyPairRSA.getN());
     }
 
 }

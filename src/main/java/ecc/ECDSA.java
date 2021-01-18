@@ -11,6 +11,15 @@ import java.util.Random;
 public class ECDSA {
 
     public static ECC_Signature Sign(ECC_Curve curve, ECC_Key kp, String message){
+
+        // Select random integer 1 <= k <= n - 1
+        Random rnd = new Random();
+        BigInteger k;
+        do{
+            k = new BigInteger(curve.getN().bitLength(), rnd);
+        } while(k.compareTo(curve.getN()) > 0);
+
+        // Compute hash of message and convert to integer
         BigInteger e = null;
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -19,22 +28,31 @@ public class ECDSA {
         } catch (NoSuchAlgorithmException f) {
             f.printStackTrace();
         }
-        Random rnd = new Random();
-        BigInteger k;
-        do{
-            k = new BigInteger(curve.getN().bitLength(), rnd);
-        } while(k.compareTo(curve.getN()) > 0);
-        ECC_Point kG = curve.getG().pointMultiplication(k, curve.getP(), curve.getA());
+
+        // Compute kG = (x1, y1)
+        ECC_Point kG = curve.getG().pointMultiplication(k);
+
+        // Computer r = x1 mod n
         BigInteger r = kG.getX().mod(curve.getN());
+
+        // Compute k-1 mod n
         BigInteger inverseK = k.modInverse(curve.getN());
-        BigInteger rPK = r.multiply(kp.getPrivateKey());
-        BigInteger erPK = e.add(rPK);
-        BigInteger s = inverseK.multiply(erPK);
+
+        // Compute s = k-1(e + pK * r) mod n
+        BigInteger pKr = r.multiply(kp.getPrivateKey());
+        BigInteger epKr = e.add(pKr);
+        BigInteger s = inverseK.multiply(epKr);
         s = s.mod(curve.getN());
+
+        // Return value
         return new ECC_Signature(r, s);
     }
 
     public static boolean Verify(ECC_Curve curve, ECC_Signature sig, ECC_Key kp, String message){
+
+        // Verify r and s are integers in interval [1, n-1]
+
+        // Compute hash of message and convert to integer
         BigInteger e = new BigInteger("0");
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -43,54 +61,94 @@ public class ECDSA {
         } catch (NoSuchAlgorithmException f) {
             f.printStackTrace();
         }
-        BigInteger s1 = sig.getS().modInverse(curve.getN());
-        BigInteger u1 = (e.multiply(s1)).mod(curve.getN());
-        BigInteger u2 = (sig.getR().multiply(s1)).mod(curve.getN());
-        ECC_Point u1G = curve.getG().pointMultiplication(u1, curve.getP(), curve.getA());
-        ECC_Point u2PK = kp.getPublicKey().pointMultiplication(u2, curve.getP(), curve.getA());
-        ECC_Point R = u1G.pointAddition(u2PK.getX(), u2PK.getY(), curve.getP());
-        return R.getX().equals(sig.getR());
+
+        // Compute w = s-1 mod n
+        BigInteger w = sig.getS().modInverse(curve.getN());
+
+        // Compute u1 = ew mod n and u2 = rw mod n
+        BigInteger u1 = (e.multiply(w)).mod(curve.getN());
+        BigInteger u2 = (sig.getR().multiply(w)).mod(curve.getN());
+
+        // Compute X = u1G + u2PK
+        ECC_Point u1G = curve.getG().pointMultiplication(u1);
+        ECC_Point u2PK = kp.getPublicKey().pointMultiplication(u2);
+        ECC_Point X = u1G.pointAddition(u2PK);
+
+        // Check x coordinate of X equals r
+        return X.getX().equals(sig.getR());
     }
 
+
+
+
     public static ECC_Signature Sign(BinaryField_Curve curve, BinaryECC_Key kp, String message){
+
+        // Select random integer 1 <= k <= n - 1
+        Random rnd = new Random();
+        BigInteger k;
+        do{
+            k = new BigInteger(curve.getN().bitLength(), rnd);
+            k = new BigInteger("11",2);
+        } while(k.compareTo(curve.getN()) > 0); // k can be 0 currently
+
+        // Compute hash of message and convert to integer
         BigInteger e = null;
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(message.getBytes(StandardCharsets.UTF_8));
             e = new BigInteger(1, hash);
+            e = new BigInteger("1010", 2);
         } catch (NoSuchAlgorithmException f) {
             f.printStackTrace();
         }
-        Random rnd = new Random();
-        BigInteger k;
-        do{
-            k = new BigInteger(curve.getN().bitLength(), rnd);
-        } while(k.compareTo(curve.getN()) > 0);
+
+        // Compute KG = (x1, y1)
         BinaryField_Point kG = curve.getG().pointMultiplication(k);
-        BigInteger r = kG.getX();
-        BigInteger inverseK = curve.multiplicativeInverse(k);
-        BigInteger rPK = curve.multiple(r, kp.getPrivateKey());
-        BigInteger erPK = curve.add(e, rPK);
-        BigInteger s = curve.multiple(inverseK, erPK);
+
+        // Compute r = x1 mod n
+        BigInteger r = kG.getX().mod(curve.getN());
+
+        // Compute k-1 mod n
+        BigInteger inverseK = k.modInverse(curve.getN());
+
+        // Compute s = k-1(e + pK * r) mod n
+        BigInteger pKr = r.multiply(kp.getPrivateKey());
+        BigInteger epKr = e.add(pKr);
+        BigInteger s = inverseK.multiply(epKr);
+        s = s.mod(curve.getN());
+
         return new ECC_Signature(r, s);
     }
 
     public static boolean Verify(BinaryField_Curve curve, ECC_Signature sig, BinaryECC_Key kp, String message){
+
+        // Verify r and s are integers in interval [1, n-1]
+
+        // Compute hash of message and convert to integer
         BigInteger e = new BigInteger("0");
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(message.getBytes(StandardCharsets.UTF_8));
             e = new BigInteger(1, hash);
+            e = new BigInteger("1010", 2);
         } catch (NoSuchAlgorithmException f) {
             f.printStackTrace();
         }
-        BigInteger s1 = curve.multiplicativeInverse(sig.getS());
-        BigInteger u1 = curve.multiple(e, s1);
-        BigInteger u2 = curve.multiple(sig.getR(), s1);
+
+        // Compute w = s-1 mod n
+        BigInteger w = sig.getS().modInverse(curve.getN());
+
+        // Compute u1 = ew mod n and u2 = rw mod n
+        BigInteger u1 = (e.multiply(w)).mod(curve.getN());
+        BigInteger u2 = (sig.getR().multiply(w)).mod(curve.getN());
+
+        // Compute X = u1G + u2PK
         BinaryField_Point u1G = curve.getG().pointMultiplication(u1);
         BinaryField_Point u2PK = kp.getPublicKey().pointMultiplication(u2);
-        BinaryField_Point R = u1G.pointAddition(u2PK);
-        return R.getX().equals(sig.getR());
+        BinaryField_Point X = u1G.pointAddition(u2PK);
+
+        // Check x coordinate of X equals r
+        return X.getX().equals(sig.getR());
     }
 
 }

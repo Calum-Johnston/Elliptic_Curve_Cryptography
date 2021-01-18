@@ -7,11 +7,20 @@ public class ECC_Point {
     ECC_Curve curve;
     BigInteger x;
     BigInteger y;
+    boolean infinity;
 
     public ECC_Point(ECC_Curve curve, BigInteger x, BigInteger y){
         this.curve = curve;
         this.x = x;
         this.y = y;
+        infinity = false;
+    }
+
+    public ECC_Point(ECC_Curve curve){
+        this.curve = curve;
+        this.x = new BigInteger("-1");
+        this.y = new BigInteger("-1");
+        this.infinity = true;
     }
 
     public BigInteger getX(){
@@ -26,40 +35,34 @@ public class ECC_Point {
         return curve;
     }
 
-    public ECC_Point pointMultiplication(BigInteger n, BigInteger p, BigInteger a){
+    public ECC_Point pointMultiplication(BigInteger n){
         ECC_Point N = this;
-        ECC_Point Q = new ECC_Point(this.curve,null, null);
-        boolean infinity = true;
+        ECC_Point Q = new ECC_Point(this.curve);
         String d = n.toString(2);
         for(int i = d.length() - 1; i >= 0; i--){
             if(d.charAt(i) == '1'){
-                if(infinity == true){
-                    infinity = false;
-                    Q = N;
-                }else {
-                    Q = Q.pointAddition(N.x, N.y, p);
-                }
+                Q = Q.pointAddition(N);
             }
-            N = N.pointDoubling(a, p);
+            N = N.pointDoubling();
         }
         return Q;
     }
 
-    public ECC_Point pointAddition(BigInteger x2, BigInteger y2, BigInteger p){
-        BigInteger gradientNumerator = y2.subtract(y);
-        BigInteger gradientDenominator = (x2.subtract(x)).modInverse(p);
-        BigInteger gradient = gradientNumerator.multiply(gradientDenominator).mod(p);
-        BigInteger x3 = (gradient.pow(2).subtract(x).subtract(x2)).mod(p);
-        BigInteger y3 = (((x.subtract(x3)).multiply(gradient)).subtract(y)).mod(p);
-        return new ECC_Point(curve, x3, y3);
+    public ECC_Point pointAddition(ECC_Point point){
+        BigInteger gradientNum = point.y.subtract(this.y);
+        BigInteger gradientDen = point.x.subtract(this.x).modInverse(curve.p);
+        BigInteger grad = gradientNum.multiply(gradientDen).mod(curve.p);
+        BigInteger Rx = (grad.pow(2).subtract(this.x).subtract(point.x)).mod(curve.p);
+        BigInteger y3 = (((this.x.subtract(Rx)).multiply(grad)).subtract(this.y)).mod(curve.p);
+        return new ECC_Point(this.curve, Rx, y3);
     }
 
-    public ECC_Point pointDoubling(BigInteger a, BigInteger p){
-        BigInteger gradientNumerator = ((x.pow(2)).multiply(new BigInteger("3")).add(a));
-        BigInteger gradientDenominator = y.multiply(new BigInteger("2")).modInverse(p);
-        BigInteger gradient = gradientNumerator.multiply(gradientDenominator).mod(p);
-        BigInteger x3 = (gradient.pow(2).subtract(x).subtract(x)).mod(p);
-        BigInteger y3 = (((x.subtract(x3)).multiply(gradient)).subtract(y)).mod(p);
-        return new ECC_Point(curve, x3, y3);
+    public ECC_Point pointDoubling(){
+        BigInteger gradientNum = ((this.x.pow(2)).multiply(new BigInteger("3")).add(curve.a));
+        BigInteger gradientDen = this.y.multiply(new BigInteger("2")).modInverse(curve.p);
+        BigInteger grad = gradientNum.multiply(gradientDen).mod(curve.p);
+        BigInteger Rx = (grad.pow(2).subtract(this.x).subtract(this.x)).mod(curve.p);
+        BigInteger Ry = (((x.subtract(Rx)).multiply(grad)).subtract(this.y)).mod(curve.p);
+        return new ECC_Point(curve, Rx, Ry);
     }
 }

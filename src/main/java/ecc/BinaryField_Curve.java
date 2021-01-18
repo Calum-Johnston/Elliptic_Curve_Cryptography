@@ -16,6 +16,10 @@ public class BinaryField_Curve {
     BigInteger n; // prime order n of the point G (i.e. n.G = O, where O is point at infinity)
     BigInteger h; // the cofactor of the curve (h = #E(Fp)/n)
 
+    /**
+     * Either have a prime field or non prime field :)
+     */
+
     public BinaryField_Curve(int m, String f, String a, String b, String x, String y, String n, String h){
         this.m = m;
         this.f = new BigInteger(f, 16);
@@ -29,8 +33,8 @@ public class BinaryField_Curve {
     // Addition
     public BigInteger add(BigInteger a, BigInteger b) {
         BigInteger temp = a.xor(b);
-        if(temp.compareTo(f) == 1){
-            return temp.xor(f);
+        if(temp.bitLength() >= f.bitLength()){
+            return reduce(temp, this.f);
         }
         return temp;
     }
@@ -39,7 +43,6 @@ public class BinaryField_Curve {
     public BigInteger multiple(BigInteger a, BigInteger b){
         BigInteger mask1 = BigInteger.TWO.pow(m);
         BigInteger mask2 = mask1.subtract(BigInteger.ONE);
-        BigInteger p = f.and(mask2);
         BigInteger result = new BigInteger("0");
         for(int i = 0; i < b.bitLength() ; i++){
             if(b.testBit(i)){
@@ -53,36 +56,53 @@ public class BinaryField_Curve {
         return result.and(mask2);
     }
 
+    // Reduce by f(x)
+    public BigInteger reduce(BigInteger a, BigInteger b){
+        int shift = a.bitLength() - b.bitLength();
+        b = b.shiftLeft(shift);
+        int currentBit = a.bitLength() - 1;
+        for(int i = 0; i < shift + 1; i++){
+            if(a.testBit(currentBit)){
+                a = a.xor(b);
+            }
+            b = b.shiftRight(1);
+            currentBit --;
+        }
+        return a;
+    }
+
+
     // Division
     public BigInteger divide(BigInteger a, BigInteger b){
         BigInteger multiplicativeInverse_b = multiplicativeInverse(b);
-        BigInteger test = multiple(b, multiplicativeInverse_b);
         BigInteger result = multiple(a, multiplicativeInverse_b);
         return result;
     }
 
     // Multiplicative Inverse
+    // file:///C:/Users/CALUMJ~1/AppData/Local/Temp/Guide%20to%20Elliptic%20Curve%20Cryptography%20(%20PDFDrive%20).pdf
     public BigInteger multiplicativeInverse(BigInteger x){
-        BigInteger s = this.f;
-        BigInteger v= BigInteger.ZERO;
-        BigInteger r = x;
-        BigInteger u = BigInteger.ONE;
-        while(degree(r) != 0){
-            int dif = degree(s) - degree(r);
-            if(dif < 0){
-                BigInteger temp = s;
-                s = r;
-                r = temp;
-                temp = v;
-                v = u;
-                u = temp;
-                dif = -dif;
+        BigInteger u = x;
+        BigInteger v = this.f;
+        BigInteger g1 = BigInteger.ONE;
+        BigInteger g2 = BigInteger.ZERO;
+        while(!u.equals(BigInteger.ONE)){
+            int j = degree(u) - degree(v);
+            if(j < 0){
+                BigInteger temp;
+                temp = u;
+                u = v;
+                v = temp;
+                temp = g1;
+                g1 = g2;
+                g2 = temp;
+                j = -j;
             }
-            BigInteger poly = BigDecimal.valueOf(Math.pow(2, dif)).toBigInteger();
-            s = add(s, multiple(poly, r));
-            v = add(v, multiple(poly, u));
+            BigInteger poly = BigDecimal.valueOf(Math.pow(2, j)).toBigInteger();
+            u = add(u, multiple(poly, v));
+            g1 = add(g1, multiple(poly, g2));
         }
-        return u;
+        return g1;
     }
 
     public int degree(BigInteger x){

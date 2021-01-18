@@ -10,10 +10,11 @@ public class ECC_Key {
 
     public ECC_Key(ECC_Curve curve){
         Random rnd = new Random();
+        BigInteger n = curve.getN();
         do{
-            privateKey = new BigInteger(curve.getN().bitLength(), rnd);
-        } while(privateKey.compareTo(curve.getN()) > 0);
-        publicKey = curve.getG().pointMultiplication(privateKey, curve.getP(), curve.getA());
+            privateKey = new BigInteger(n.bitLength(), rnd);
+        } while(privateKey.compareTo(n) > 0);
+        publicKey = curve.getG().pointMultiplication(privateKey);
     }
 
     public BigInteger getPrivateKey(){

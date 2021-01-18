@@ -8,13 +8,12 @@ public class BinaryECC_Key {
     BigInteger privateKey;
     BinaryField_Point publicKey;
 
-    public BinaryECC_Key(BinaryField_Curve curve, BigInteger val){
+    public BinaryECC_Key(BinaryField_Curve curve){
         Random rnd = new Random();
         BigInteger n = curve.getN();
         do{
             privateKey = new BigInteger(n.bitLength(), rnd);
-            privateKey = val;
-        } while(privateKey.compareTo(n) > 0);
+        } while(privateKey.compareTo(n) >= 0 || privateKey.compareTo(BigInteger.ZERO) < 1);
         publicKey = curve.getG().pointMultiplication(privateKey);
     }
 
