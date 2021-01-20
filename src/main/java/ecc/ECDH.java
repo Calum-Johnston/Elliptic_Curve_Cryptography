@@ -1,5 +1,8 @@
 package ecc;
 
+import future.BinaryField_Curve;
+import future.BinaryField_Point;
+
 import java.math.BigInteger;
 
 public class ECDH {

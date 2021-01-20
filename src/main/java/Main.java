@@ -1,7 +1,7 @@
 import ecc.*;
-import rsa.RSA;
-import rsa.RSA_Key;
-
+import future.BinaryECC_Key;
+import future.BinaryField_Curve;
+import future.BinaryField_Point;
 
 import java.math.BigInteger;
 
@@ -184,6 +184,8 @@ public class Main {
 
         return new BinaryField_Curve(degree, f, a, b, x, y, n, h);
     }
+
+
 
     public static void main(String[] args){
         Main main = new Main();

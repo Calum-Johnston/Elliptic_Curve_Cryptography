@@ -1,5 +1,9 @@
 package ecc;
 
+import future.BinaryECC_Key;
+import future.BinaryField_Curve;
+import future.BinaryField_Point;
+
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
