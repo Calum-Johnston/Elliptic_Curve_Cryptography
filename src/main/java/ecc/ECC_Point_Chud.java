@@ -44,10 +44,6 @@ public class ECC_Point_Chud extends ECC_Point{
             return point;
         } else if(point.infinity == true){ // Q == O
             return this;
-        } else if(this.x.equals(point.x) && this.y.equals(point.y)) {  // P == Q
-            return pointDoubling();
-        } else if(this.x.equals(point.x) && this.y.equals(point.y.negate())){ // P == -Q
-            return new ECC_Point_Chud(this.curve);
         }
 
         // Computations required
@@ -55,6 +51,17 @@ public class ECC_Point_Chud extends ECC_Point{
         BigInteger u2 = multiple(point.x, this.z2);
         BigInteger s1 = multiple(this.y, point.z3);
         BigInteger s2 = multiple(point.y, this.z3);
+
+        // Perform addition checks
+        if(u1.equals(u2)) {
+            if(s1.equals(s2)) {  // P == Q
+                return pointDoubling();
+            } else {
+                return new ECC_Point_Chud(this.curve); // P == -Q (for basic curve)
+            }
+        }
+
+        // Continue with computations
         BigInteger H = subtract(u2, u1);
         BigInteger H_2 = square(H);
         BigInteger H_3 = multiple(H_2, H);
@@ -63,20 +70,11 @@ public class ECC_Point_Chud extends ECC_Point{
         BigInteger u1H_2 = multiple(u1, H_2);
         BigInteger s1H_3 = multiple(s1, H_3);
 
-
-        // Calculate x
-        BigInteger Rx = add(subtract(H_3.negate(), multiple(BigInteger.TWO, u1H_2)),  r_2);
-
-        // Calculate y
-        BigInteger Ry = add(s1H_3.negate(), multiple(r, subtract(u1H_2, Rx)));
-
-        // Calculate z
+        // Calculate Rx, Ry, Rz, Rz2, and Rz3
+        BigInteger Rx = subtract(subtract(r_2, H_3), multiple(BigInteger.TWO, u1H_2));
+        BigInteger Ry = subtract(multiple(r, subtract(u1H_2, Rx)), s1H_3);
         BigInteger Rz = multiple(this.z, multiple(point.z, H));
-
-        // Calculate z2
         BigInteger Rz2 = square(Rz);
-
-        // Calculate z3
         BigInteger Rz3 = multiple(Rz2, Rz);
 
         // Return the calculated value
@@ -86,42 +84,33 @@ public class ECC_Point_Chud extends ECC_Point{
     public ECC_Point_Chud pointDoubling(){
 
         // Perform required checks
-        if (this.infinity == true){ // P = O
+        if(this.infinity == true) { // P = O
             return this;
-        } else if(this.y.equals(this.y.negate())) { // P == -P
+        } else if(this.y.equals(BigInteger.ZERO)) { // P == -P
             return new ECC_Point_Chud(this.curve);
         }
 
         // Computations required
-        BigInteger y1_2 = this.y.pow(2);
-        BigInteger y1_4 = y1_2.pow(2);
-        BigInteger x1y1_2 = this.x.multiply(y1_2);
-        BigInteger S = x1y1_2.multiply(new BigInteger("4"));
-        BigInteger x1_2 = this.x.pow(2);
-        BigInteger z1_4 = this.z2.pow(2);
-        BigInteger az1_4 = this.curve.a.multiply(z1_4);
-        BigInteger M = x1_2.multiply(new BigInteger("3")).add(az1_4);
-        BigInteger M_2 = M.pow(2);
-        BigInteger T = ((S.multiply(BigInteger.TWO)).negate()).add(M_2);
+        BigInteger y1_2 = square(this.y);
+        BigInteger y1_4 = square(y1_2);
+        BigInteger x1y1_2 = multiple(this.x, y1_2);
+        BigInteger S = multiple(x1y1_2, new BigInteger("4"));
+        BigInteger x1_2 = square(this.x);
+        BigInteger z1_4 = square(this.z2);
+        BigInteger az1_4 = multiple(this.curve.a, z1_4);
+        BigInteger M = add(az1_4, multiple(x1_2, new BigInteger("3")));
+        BigInteger M_2 = square(M);
+        BigInteger T = add(M_2, (multiple(S, BigInteger.TWO).negate()));
 
-        // Calculate x
+        // Calculate Rx, Ry, Rz, Rz2, and Rz3
         BigInteger Rx = T;
-
-        // Calculate y3
-        BigInteger Ry = ((y1_4.multiply(new BigInteger("8"))).negate()).add(M.multiply(S.subtract(T)));
-
-        // Calculate z
+        BigInteger Ry = subtract(multiple(M, subtract(S, T)), multiple(y1_4, new BigInteger("8")));
         BigInteger Rz = this.y.multiply(this.z.multiply(BigInteger.TWO));
-
-        // Calculate z2
         BigInteger Rz2 = Rz.pow(2);
-
-        // Calculate z3
         BigInteger Rz3 = Rz2.multiply(Rz);
 
         // Return the calculated value
-        return new ECC_Point_Chud(this.curve, Rx.mod(curve.getP()), Ry.mod(curve.getP()), Rz.mod(curve.getP()),
-                Rz2.mod(curve.getP()), Rz3.mod(curve.getP()));
+        return new ECC_Point_Chud(this.curve, Rx, Ry, Rz, Rz2, Rz3);
     }
 
 
@@ -166,11 +155,4 @@ public class ECC_Point_Chud extends ECC_Point{
         this.z3 = z3;
     }
 
-    public ECC_Curve getCurve(){
-        return curve;
-    }
-
-    public void setCurve(ECC_Curve curve){
-        this.curve = curve;
-    }
 }

@@ -6,36 +6,36 @@ public class Main {
 
     // Potential Curves https://tools.ietf.org/html/rfc5639
     public ECC_Curve generatePrimeFieldCurve(){
-        String p = "E95E4A5F737059DC60DFC7AD95B3D8139515620F";
-        String a = "340E7BE2A280EB74E2BE61BADA745D97E8F7C300";
-        String b = "1E589A8595423412134FAA2DBDEC95C8D8675E58";
-        String x = "BED5AF16EA3F6A4F62938C4631EB5AF7BDBCDBC3";
-        String y = "1667CB477A1A8EC338F94741669C976316DA6321";
-        String n = "E95E4A5F737059DC60DF5991D45029409E60FC09";
-        String h = "1";
+        BigInteger p = new BigInteger("E95E4A5F737059DC60DFC7AD95B3D8139515620F",16);
+        BigInteger a = new BigInteger("340E7BE2A280EB74E2BE61BADA745D97E8F7C300",16);
+        BigInteger b = new BigInteger("1E589A8595423412134FAA2DBDEC95C8D8675E58",16);
+        BigInteger x = new BigInteger("BED5AF16EA3F6A4F62938C4631EB5AF7BDBCDBC3",16);
+        BigInteger y = new BigInteger("1667CB477A1A8EC338F94741669C976316DA6321",16);
+        BigInteger n = new BigInteger("E95E4A5F737059DC60DF5991D45029409E60FC09",16);
+        BigInteger h = new BigInteger("1");
         return new ECC_Curve(p, a, b, x, y, n, h);
     }
 
     // From https://www.ijert.org/research/implementation-of-elliptic-curve-arithmetic-operations-for-prime-field-and-binary-field-using-java-biginteger-class-IJERTV6IS080211.pdf
     public ECC_Curve generatePrimeFieldCurve_192(){
-        String p = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFF";
-        String a = "-3";
-        String b = "64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1";
-        String x = "188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012";
-        String y = "07192b95ffc8da78631011ed6b24cdd573f977a11e794811";
-        String n = "FFFFFFFFFFFFFFFFFFFFFFFF99DEF836146BC9B1B4D22831";
-        String h = "1";
-        return new ECC_Curve(p, a, b, x, y, n, h, true);
+        BigInteger p = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFF",16);
+        BigInteger a = new BigInteger("-3");
+        BigInteger b = new BigInteger("64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1",16);
+        BigInteger x = new BigInteger("188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012",16);
+        BigInteger y = new BigInteger("07192b95ffc8da78631011ed6b24cdd573f977a11e794811",16);
+        BigInteger n = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFF99DEF836146BC9B1B4D22831",16);
+        BigInteger h = new BigInteger("1");
+        return new ECC_Curve(p, a, b, x, y, n, h);
     }
 
     public ECC_Curve generatePrimeFieldCurve_basic(){
-        String p = "17";
-        String a = "1";
-        String b = "1";
-        String x = "3";
-        String y = "A";
-        String n = "1C";
-        String h = "1";
+        BigInteger p = new BigInteger("23");
+        BigInteger a = new BigInteger("1");
+        BigInteger b = new BigInteger("1");
+        BigInteger x = new BigInteger("3");
+        BigInteger y = new BigInteger("10");
+        BigInteger n = new BigInteger("28");
+        BigInteger h = new BigInteger("1");
         return new ECC_Curve(p, a, b, x, y, n, h);
     }
 

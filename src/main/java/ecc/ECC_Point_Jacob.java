@@ -39,10 +39,6 @@ public class ECC_Point_Jacob extends ECC_Point {
             return point;
         } else if(point.infinity == true){ // Q == O
             return this;
-        } else if(this.x.equals(point.x) && this.y.equals(point.y)) {  // P == Q
-            return pointDoubling();
-        } else if(this.x.equals(point.x) && this.y.equals(point.y.negate())){ // P == -Q
-            return new ECC_Point_Jacob(this.curve);
         }
 
         // Computations required
@@ -52,6 +48,17 @@ public class ECC_Point_Jacob extends ECC_Point {
         BigInteger u2 = multiple(point.x, z1_2);
         BigInteger s1 = multiple(this.y, multiple(z2_2, point.z));
         BigInteger s2 = multiple(point.y, multiple(z1_2, this.z));
+
+        // Perform addition checks
+        if(u1.equals(u2)) {
+            if(s1.equals(s2)) {  // P == Q
+                return pointDoubling();
+            } else {
+                return new ECC_Point_Jacob(this.curve); // P == -Q (for basic curve)
+            }
+        }
+
+        // Continue with computations
         BigInteger H = subtract(u2, u1);
         BigInteger H_2 = square(H);
         BigInteger H_3 = multiple(H_2, H);
@@ -60,52 +67,43 @@ public class ECC_Point_Jacob extends ECC_Point {
         BigInteger u1H_2 = multiple(u1, H_2);
         BigInteger s1H_3 = multiple(s1, H_3);
 
-        // Calculate x3
-        BigInteger x3 = add(subtract(H_3.negate(), multiple(BigInteger.TWO, u1H_2)),  r_2);
-
-        // Calculate y3
-        BigInteger y3 = add(s1H_3.negate(), multiple(r, subtract(u1H_2, x3)));
-
-        // Calculate z3
-        BigInteger z3 = multiple(this.z, multiple(point.z, H));
+        // Calculate Rx, Ry, and Rz
+        BigInteger Rx = subtract(subtract(r_2, H_3), multiple(BigInteger.TWO, u1H_2));
+        BigInteger Ry = subtract(multiple(r, subtract(u1H_2, Rx)), s1H_3);
+        BigInteger Rz = multiple(this.z, multiple(point.z, H));
 
         // Return the calculated value
-        return new ECC_Point_Jacob(this.curve, x3, y3, z3);
+        return new ECC_Point_Jacob(this.curve, Rx, Ry, Rz);
     }
 
     public ECC_Point_Jacob pointDoubling(){
 
         // Perform required checks
-        if (this.infinity == true){ // P = O
+        if(this.infinity == true) { // P = O
             return this;
-        } else if(this.y.equals(this.y.negate())) { // P == -P
+        } else if(this.y.equals(BigInteger.ZERO)) { // P == -P
             return new ECC_Point_Jacob(this.curve);
         }
 
         // Computations required
-        BigInteger y1_2 = this.y.pow(2);
-        BigInteger y1_4 = y1_2.pow(2);
-        BigInteger x1y1_2 = this.x.multiply(y1_2);
-        BigInteger S = x1y1_2.multiply(new BigInteger("4"));
-        BigInteger x1_2 = this.x.pow(2);
-        BigInteger z1_4 = this.z.pow(4);
-        BigInteger az1_4 = this.curve.a.multiply(z1_4);
-        BigInteger M = x1_2.multiply(new BigInteger("3")).add(az1_4);
-        BigInteger M_2 = M.pow(2);
-        BigInteger T = ((S.multiply(BigInteger.TWO)).negate()).add(M_2);
+        BigInteger y1_2 = square(this.y);
+        BigInteger y1_4 = square(y1_2);
+        BigInteger x1y1_2 = multiple(this.x, y1_2);
+        BigInteger S = multiple(x1y1_2, new BigInteger("4"));
+        BigInteger x1_2 = square(this.x);
+        BigInteger z1_4 = square(square(this.z));
+        BigInteger az1_4 = multiple(this.curve.a, z1_4);
+        BigInteger M = add(az1_4, multiple(x1_2, new BigInteger("3")));
+        BigInteger M_2 = square(M);
+        BigInteger T = add(M_2, (multiple(S, BigInteger.TWO).negate()));
 
-        // Calculate x3
-        BigInteger x3 = T;
-
-        // Calculate y3
-        BigInteger y3 = ((y1_4.multiply(new BigInteger("8"))).negate()).add(M.multiply(S.subtract(T)));
-
-        // Calculate z3
-        BigInteger z3 = this.y.multiply(this.z.multiply(BigInteger.TWO));
-
+        // Calculate Rx, Ry, and Rz
+        BigInteger Rx = T;
+        BigInteger Ry = subtract(multiple(M, subtract(S, T)), multiple(y1_4, new BigInteger("8")));
+        BigInteger Rz = this.y.multiply(this.z.multiply(BigInteger.TWO));
 
         // Return the calculated value
-        return new ECC_Point_Jacob(this.curve, x3.mod(curve.p), y3.mod(curve.p), z3.mod(curve.p));
+        return new ECC_Point_Jacob(this.curve, Rx, Ry, Rz);
     }
 
 
@@ -134,11 +132,4 @@ public class ECC_Point_Jacob extends ECC_Point {
         this.z = z;
     }
 
-    public ECC_Curve getCurve(){
-        return curve;
-    }
-
-    public void setCurve(ECC_Curve curve){
-        this.curve = curve;
-    }
 }

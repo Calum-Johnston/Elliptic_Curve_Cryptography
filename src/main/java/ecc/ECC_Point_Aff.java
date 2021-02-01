@@ -15,8 +15,6 @@ public class ECC_Point_Aff extends ECC_Point {
 
     public ECC_Point_Aff(ECC_Curve curve){
         super(curve, true);
-        this.x = new BigInteger("-1");
-        this.y = new BigInteger("-1");
     }
 
     public ECC_Point_Aff pointMultiplication(BigInteger n){
@@ -33,41 +31,57 @@ public class ECC_Point_Aff extends ECC_Point {
     }
 
     public ECC_Point_Aff pointAddition(ECC_Point_Aff point){
+
+        // Perform required checks
         if(this.infinity == true){ // P == O
             return point;
         } else if(point.infinity == true){ // Q == O
             return this;
-        } else if(this.x.equals(point.x) && this.y.equals(point.y)) {  // P == Q
-            return pointDoubling();
-        } else if(this.x.equals(point.x) && this.y.equals(point.y.negate())) { // P == -Q
-            return new ECC_Point_Aff(this.curve);
+        } else if(this.x.equals(point.x)) {
+            if (this.y.equals(point.y)) {  // P == Q
+                return pointDoubling();
+            } else {
+                return new ECC_Point_Aff(this.curve); // P == -Q (for basic curve)
+            }
         }
-        BigInteger gradientNum = point.y.subtract(this.y);
-        BigInteger gradientDen = point.x.subtract(this.x).modInverse(curve.p);
-        BigInteger grad = gradientNum.multiply(gradientDen).mod(curve.p);
-        BigInteger Rx = (grad.pow(2).subtract(this.x).subtract(point.x)).mod(curve.p);
-        BigInteger y3 = (((this.x.subtract(Rx)).multiply(grad)).subtract(this.y)).mod(curve.p);
-        return new ECC_Point_Aff(this.curve, Rx, y3);
+
+        // Computations required
+        BigInteger gradNum = subtract(point.y, this.y);
+        BigInteger gradDem = subtract(point.x, this.x);
+        BigInteger grad = divide(gradNum, gradDem);
+
+        // Calculate Rx and Ry
+        BigInteger Rx = subtract(subtract(square(grad), this.x), point.x);
+        BigInteger Ry = subtract(multiple(grad, subtract(this.x, Rx)), this.y);
+
+        // Return the calculated value
+        return new ECC_Point_Aff(this.curve, Rx, Ry);
     }
 
     public ECC_Point_Aff pointDoubling(){
-        if(this.y.equals(this.y.negate())) { // P == -P
+
+        // Perform required checks
+        if(this.infinity == true) { // P = O
+            return this;
+        } else if(this.y.equals(BigInteger.ZERO)) { // P == -P
             return new ECC_Point_Aff(this.curve);
         }
-        if(this.infinity == true){ // P = O
-            return this;
-        }
-        BigInteger gradientNum = ((this.x.pow(2)).multiply(new BigInteger("3")).add(curve.a));
-        BigInteger gradientDen = this.y.multiply(new BigInteger("2")).modInverse(curve.p);
-        BigInteger grad = gradientNum.multiply(gradientDen).mod(curve.p);
-        BigInteger Rx = (grad.pow(2).subtract(this.x).subtract(this.x)).mod(curve.p);
-        BigInteger Ry = (((x.subtract(Rx)).multiply(grad)).subtract(this.y)).mod(curve.p);
+
+        // Computations required
+        BigInteger gradNum = add(multiple(new BigInteger("3"), square(this.x)), this.curve.a);
+        BigInteger gradDem = multiple(BigInteger.TWO, this.y);
+        BigInteger grad = divide(gradNum, gradDem);
+
+        // Calculate Rx and Ry
+        BigInteger Rx = subtract(square(grad), multiple(BigInteger.TWO, this.x));
+        BigInteger Ry = subtract(multiple(grad, subtract(this.x, Rx)), this.y);
+
+        // Return the calculated value
         return new ECC_Point_Aff(curve, Rx, Ry);
     }
 
 
     // Getters and setters
-
     public BigInteger getX(){
         return x;
     }
@@ -84,11 +98,4 @@ public class ECC_Point_Aff extends ECC_Point {
         this.y = y;
     }
 
-    public ECC_Curve getCurve(){
-        return curve;
-    }
-
-    public void setCurve(ECC_Curve curve){
-        this.curve = curve;
-    }
 }
