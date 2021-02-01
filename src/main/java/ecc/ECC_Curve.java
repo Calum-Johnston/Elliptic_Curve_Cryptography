@@ -7,7 +7,7 @@ public class ECC_Curve {
     BigInteger p; // prime specifying the base field GF(p)
     BigInteger a; // a coefficient of the equation
     BigInteger b; // b coefficient of the equation
-    ECC_Point G; // Base point
+    ECC_Point_Aff G; // Base point
     BigInteger n; // prime order n of the point G (i.e. n.G = O, where O is point at infinity)
     BigInteger h; // the cofactor of the curve (h = #E(Fp)/n)
 
@@ -15,7 +15,16 @@ public class ECC_Curve {
         this.p = new BigInteger(p, 16);
         this.a = new BigInteger(a, 16);
         this.b = new BigInteger(b, 16);
-        this.G = new ECC_Point(this, new BigInteger(x, 16), new BigInteger(y, 16));
+        this.G = new ECC_Point_Aff(this, new BigInteger(x, 16), new BigInteger(y, 16));
+        this.n = new BigInteger(n, 16);
+        this.h = new BigInteger(h, 16);
+    }
+
+    public ECC_Curve(String p, String a, String b, String x, String y, String n, String h, boolean x21){
+        this.p = new BigInteger(p, 16);
+        this.a = new BigInteger(a);
+        this.b = new BigInteger(b, 16);
+        this.G = new ECC_Point_Aff(this, new BigInteger(x, 16), new BigInteger(y, 16));
         this.n = new BigInteger(n, 16);
         this.h = new BigInteger(h, 16);
     }
@@ -44,11 +53,11 @@ public class ECC_Curve {
         this.b = new BigInteger(b, 16);
     }
 
-    public ECC_Point getG(){
+    public ECC_Point_Aff getG(){
         return G;
     }
 
-    public void setG(ECC_Point G){
+    public void setG(ECC_Point_Aff G){
         this.G = G;
     }
 

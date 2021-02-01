@@ -6,7 +6,7 @@ import java.util.Random;
 public class ECC_Key {
 
     BigInteger privateKey;
-    ECC_Point publicKey;
+    ECC_Point_Aff publicKey;
 
     public ECC_Key(ECC_Curve curve){
         Random rnd = new Random();
@@ -25,11 +25,11 @@ public class ECC_Key {
         this.privateKey = privateKey;
     }
 
-    public ECC_Point getPublicKey(){
+    public ECC_Point_Aff getPublicKey(){
         return publicKey;
     }
 
-    public void setPublicKey(ECC_Point publicKey){
+    public void setPublicKey(ECC_Point_Aff publicKey){
         this.publicKey = publicKey;
     }
 

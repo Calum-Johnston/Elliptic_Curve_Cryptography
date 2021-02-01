@@ -34,7 +34,7 @@ public class ECDSA {
         }
 
         // Compute kG = (x1, y1)
-        ECC_Point kG = curve.getG().pointMultiplication(k);
+        ECC_Point_Aff kG = curve.getG().pointMultiplication(k);
 
         // Computer r = x1 mod n
         BigInteger r = kG.getX().mod(curve.getN());
@@ -74,9 +74,9 @@ public class ECDSA {
         BigInteger u2 = (sig.getR().multiply(w)).mod(curve.getN());
 
         // Compute X = u1G + u2PK
-        ECC_Point u1G = curve.getG().pointMultiplication(u1);
-        ECC_Point u2PK = kp.getPublicKey().pointMultiplication(u2);
-        ECC_Point X = u1G.pointAddition(u2PK);
+        ECC_Point_Aff u1G = curve.getG().pointMultiplication(u1);
+        ECC_Point_Aff u2PK = kp.getPublicKey().pointMultiplication(u2);
+        ECC_Point_Aff X = u1G.pointAddition(u2PK);
 
         // Check x coordinate of X equals r
         return X.getX().equals(sig.getR());

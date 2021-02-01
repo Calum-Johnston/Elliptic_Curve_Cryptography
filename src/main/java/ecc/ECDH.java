@@ -7,8 +7,8 @@ import java.math.BigInteger;
 
 public class ECDH {
 
-    public static BigInteger computeSecret(ECC_Curve curve, ECC_Point pubK, BigInteger priK){
-        ECC_Point sharedK = pubK.pointMultiplication(priK);
+    public static BigInteger computeSecret(ECC_Curve curve, ECC_Point_Aff pubK, BigInteger priK){
+        ECC_Point_Aff sharedK = pubK.pointMultiplication(priK);
         return sharedK.getX();
     }
 

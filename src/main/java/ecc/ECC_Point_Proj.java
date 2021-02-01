@@ -2,16 +2,14 @@ package ecc;
 
 import java.math.BigInteger;
 
-public class ECC_Point_Proj {
+public class ECC_Point_Proj extends ECC_Point {
 
-    boolean infinity;
-    ECC_Curve curve;
     BigInteger x;
     BigInteger y;
     BigInteger z;
 
-    public ECC_Point_Proj(ECC_Curve curve, BigInteger x, BigInteger y, BigInteger z){
-        this.curve = curve;
+    public ECC_Point_Proj(ECC_Curve curve, BigInteger x, BigInteger y, BigInteger z) {
+        super(curve, false);
         this.x = x;
         this.y = y;
         this.z = z;
@@ -19,8 +17,7 @@ public class ECC_Point_Proj {
     }
 
     public ECC_Point_Proj(ECC_Curve curve){
-        this.curve = curve;
-        this.infinity = true;
+        super(curve, true);
     }
 
     public ECC_Point_Proj pointMultiplication(BigInteger n){
@@ -39,41 +36,35 @@ public class ECC_Point_Proj {
     public ECC_Point_Proj pointAddition(ECC_Point_Proj point){
 
         // Perform required checks
-        if(this.x.equals(point.x) && this.y.equals(point.y)) {  // P == Q
-            return pointDoubling();
-        } else if(this.x.equals(point.x) && this.y.equals(point.y.negate())){ // P == -Q
-            return new ECC_Point_Proj(this.curve);
-        }else if(this.infinity == true){ // P == O
+        if(this.infinity == true){ // P == O
             return point;
         } else if(point.infinity == true){ // Q == O
             return this;
+        } else if(this.x.equals(point.x) && this.y.equals(point.y)) {  // P == Q
+            return pointDoubling();
+        } else if(this.x.equals(point.x) && this.y.equals(point.y.negate())){ // P == -Q
+            return new ECC_Point_Proj(this.curve);
         }
 
-        // Perform required multiplications
-        BigInteger y2z1 = point.y.multiply(this.z);
-        BigInteger y1z2 = this.y.multiply(point.z);
-        BigInteger x2z1 = point.x.multiply(this.z);
-        BigInteger x1z2 = this.x.multiply(point.z);
-        BigInteger z1z2 = this.z.multiply(point.z);
+        // Computations required
+        BigInteger y2z1 = multiple(point.y, this.z);
+        BigInteger y1z2 = multiple(this.y, point.z);
+        BigInteger x2z1 = multiple(point.x, this.z);
+        BigInteger x1z2 = multiple(this.x, point.z);
+        BigInteger u = subtract(y2z1, y1z2);
+        BigInteger v = subtract(x2z1, x1z2);
+        BigInteger z1z2 = multiple(this.z, point.z);
+        BigInteger u_2 = square(u);
+        BigInteger v_2 = square(v);
+        BigInteger v_3 = multiple(v_2, v);
+        BigInteger u_2z1z2 = multiple(u_2, z1z2);
+        BigInteger v_2x1z2 = multiple(v_2, x1z2);
+        BigInteger A = subtract(subtract(u_2z1z2, v_3), multiple(BigInteger.TWO, v_2x1z2));
 
-        // Calculate u, v
-        BigInteger u = y2z1.subtract(y1z2);
-        BigInteger v = x2z1.subtract(x1z2);
-
-        // Perform required squaring
-        BigInteger u_2 = u.pow(2);
-        BigInteger v_2 = v.pow(2);
-        BigInteger v_3 = v_2.multiply(v);
-
-        // Calculate A
-        BigInteger u_2z1z2 = u_2.multiply(z1z2);
-        BigInteger v_2x1z2 = v_2.multiply(x1z2);
-        BigInteger A = u_2z1z2.subtract(v_3).subtract(v_2x1z2.multiply(BigInteger.TWO));
-
-        // Calculate x3, y3, and z3
-        BigInteger x3 = v.multiply(A);
-        BigInteger y3 = u.multiply(v_2x1z2.subtract(A));
-        BigInteger z3 = v_3.multiply(z1z2);
+        // Calculate Rx, Ry, and Rz
+        BigInteger x3 = multiple(v, A);
+        BigInteger y3 = multiple(u, subtract(v_2x1z2, A)).subtract(multiple(v_3, y1z2));
+        BigInteger z3 = multiple(v_3, z1z2);
 
         // Return the calculated value
         return new ECC_Point_Proj(this.curve, x3, y3, z3);
@@ -111,7 +102,7 @@ public class ECC_Point_Proj {
         BigInteger z3 = s.pow(3).multiply(new BigInteger("8"));
 
         // Return the calculated value
-        return new ECC_Point_Proj(this.curve, x3, y3, z3);
+        return new ECC_Point_Proj(this.curve, x3.mod(curve.p), y3.mod(curve.p), z3.mod(curve.p));
     }
 
 
@@ -130,6 +121,14 @@ public class ECC_Point_Proj {
 
     public void setY(BigInteger y) {
         this.y = y;
+    }
+
+    public BigInteger getZ() {
+        return z;
+    }
+
+    public void setZ(BigInteger z) {
+        this.z = z;
     }
 
     public ECC_Curve getCurve(){
