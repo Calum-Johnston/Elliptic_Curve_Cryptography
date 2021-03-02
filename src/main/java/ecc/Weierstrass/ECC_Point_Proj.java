@@ -1,4 +1,6 @@
-package ecc;
+package ecc.Weierstrass;
+
+import ecc.ECC_Point;
 
 import java.math.BigInteger;
 
@@ -8,21 +10,58 @@ public class ECC_Point_Proj extends ECC_Point {
     BigInteger y;
     BigInteger z;
 
-    public ECC_Point_Proj(ECC_Curve curve, BigInteger x, BigInteger y, BigInteger z) {
+    // Constructors
+
+    public ECC_Point_Proj(ECC_Curve_Weierstrass curve, BigInteger x, BigInteger y, BigInteger z) {
         super(curve, false);
         this.x = x;
         this.y = y;
         this.z = z;
-        infinity = false;
     }
 
-    public ECC_Point_Proj(ECC_Curve curve){
+    public ECC_Point_Proj(ECC_Curve_Weierstrass curve){
         super(curve, true);
     }
 
-    public ECC_Point_Proj pointMultiplication(BigInteger n){
+    public ECC_Point_Proj(ECC_Point_Aff point){
+        super(point.getCurve(), false);
+        this.x = point.getX();
+        this.y = point.getY();
+        this.z = BigInteger.ONE;
+    }
+
+    public ECC_Point_Proj(ECC_Point_Jacob point){
+        super(point.getCurve(), false);
+        BigInteger invZ = inverse(point.getZ());
+        BigInteger invZ_2 = square(invZ);
+        this.x = multiple(point.x, invZ);
+        this.y = multiple(point.y, invZ_2);
+        this.z = point.z;
+    }
+
+    public ECC_Point_Proj(ECC_Point_Chud point){
+        super(point.getCurve(), false);
+        BigInteger invZ = inverse(point.getZ());
+        BigInteger invZ_2 = square(invZ);
+        this.x = multiple(point.x, invZ);
+        this.y = multiple(point.y, invZ_2);
+        this.z = point.z;
+    }
+
+    public ECC_Point_Proj(ECC_Point_ModJacob point){
+        super(point.getCurve(), false);
+        BigInteger invZ = inverse(point.getZ());
+        BigInteger invZ_2 = square(invZ);
+        this.x = multiple(point.x, invZ);
+        this.y = multiple(point.y, invZ_2);
+        this.z = point.z;
+    }
+
+
+    // Scalar Arithmetic
+    public ECC_Point_Proj doubleAndAdd(BigInteger n){
         ECC_Point_Proj N = this;
-        ECC_Point_Proj Q = new ECC_Point_Proj(this.curve);
+        ECC_Point_Proj Q = new ECC_Point_Proj(this.getCurve());
         String d = n.toString(2);
         for(int i = d.length() - 1; i >= 0; i--){
             if(d.charAt(i) == '1'){
@@ -33,12 +72,30 @@ public class ECC_Point_Proj extends ECC_Point {
         return Q;
     }
 
+    public ECC_Point_Proj Montgomery(BigInteger n){
+        ECC_Point_Proj R1 = this;
+        ECC_Point_Proj R0 = new ECC_Point_Proj(this.getCurve());
+        String d = n.toString(2);
+        for(int i = d.length() - 1; i >= 0; i--){
+            if(d.charAt(i) == '0'){
+                R1 = R0.pointAddition(R1);
+                R0 = R0.pointDoubling();
+            }else{
+                R0 = R0.pointAddition(R1);
+                R1 = R1.pointDoubling();
+            }
+        }
+        return R0;
+    }
+
+
+    // Point Arithmetic
     public ECC_Point_Proj pointAddition(ECC_Point_Proj point){
 
         // Perform required checks
-        if(this.infinity == true){ // P == O
+        if(this.isInfinity() == true){ // P == O
             return point;
-        } else if(point.infinity == true){ // Q == O
+        } else if(point.isInfinity() == true){ // Q == O
             return this;
         }
 
@@ -53,7 +110,7 @@ public class ECC_Point_Proj extends ECC_Point {
             if(y2z1.equals(y1z2)) {  // P == Q
                 return pointDoubling();
             } else {
-                return new ECC_Point_Proj(this.curve); // P == -Q (for basic curve)
+                return new ECC_Point_Proj(this.getCurve()); // P == -Q (for basic curve)
             }
         }
 
@@ -74,22 +131,22 @@ public class ECC_Point_Proj extends ECC_Point {
         BigInteger Rz = multiple(v_3, z1z2);
 
         // Return the calculated value
-        return new ECC_Point_Proj(this.curve, Rx, Ry, Rz);
+        return new ECC_Point_Proj(this.getCurve(), Rx, Ry, Rz);
     }
 
     public ECC_Point_Proj pointDoubling(){
 
         // Perform required checks
-        if(this.infinity == true) { // P = O
+        if(this.isInfinity() == true) { // P = O
             return this;
         } else if(this.y.equals(BigInteger.ZERO)) { // P == -P
-            return new ECC_Point_Proj(this.curve);
+            return new ECC_Point_Proj(this.getCurve());
         }
 
         // Computations required
         BigInteger z1_2 = square(this.z);
         BigInteger x1_2 = square(this.x);
-        BigInteger az1_2 = multiple(this.curve.a, z1_2);
+        BigInteger az1_2 = multiple(this.getCurve().getA(), z1_2);
         BigInteger w = add(az1_2, multiple(x1_2, new BigInteger("3")));
         BigInteger s = multiple(this.y, this.z);
         BigInteger B = multiple(this.x, multiple(this.y, s));
@@ -103,7 +160,7 @@ public class ECC_Point_Proj extends ECC_Point {
         BigInteger Rz = multiple(multiple(square(s), s), new BigInteger("8"));
 
         // Return the calculated value
-        return new ECC_Point_Proj(this.curve, Rx, Ry, Rz);
+        return new ECC_Point_Proj(this.getCurve(), Rx, Ry, Rz);
     }
 
 

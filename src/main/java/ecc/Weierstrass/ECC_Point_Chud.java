@@ -1,8 +1,10 @@
-package ecc;
+package ecc.Weierstrass;
+
+import ecc.ECC_Point;
 
 import java.math.BigInteger;
 
-public class ECC_Point_Chud extends ECC_Point{
+public class ECC_Point_Chud extends ECC_Point {
 
     BigInteger x;
     BigInteger y;
@@ -10,7 +12,9 @@ public class ECC_Point_Chud extends ECC_Point{
     BigInteger z2;
     BigInteger z3;
 
-    public ECC_Point_Chud(ECC_Curve curve, BigInteger x, BigInteger y, BigInteger z,
+    // Constructors
+
+    public ECC_Point_Chud(ECC_Curve_Weierstrass curve, BigInteger x, BigInteger y, BigInteger z,
                           BigInteger z2, BigInteger z3){
         super(curve, false);
         this.x = x;
@@ -20,11 +24,51 @@ public class ECC_Point_Chud extends ECC_Point{
         this.z3 = z3;
     }
 
-    public ECC_Point_Chud(ECC_Curve curve){
+    public ECC_Point_Chud(ECC_Curve_Weierstrass curve){
         super(curve, true);
     }
 
-    public ECC_Point_Chud pointMultiplication(BigInteger n){
+    public ECC_Point_Chud(ECC_Point_Aff point){
+        super(point.curve, false);
+        this.x = point.getX();
+        this.y = point.getY();
+        this.z = BigInteger.ONE;
+        this.z2 = BigInteger.ONE;
+        this.z3 = BigInteger.ONE;
+    }
+
+    public ECC_Point_Chud(ECC_Point_Proj point){
+        super(point.curve, false);
+        this.z = point.z;
+        this.z2 = square(this.z);
+        this.z3 = multiple(this.z2, this.z);
+        this.x = multiple(point.x, this.z);
+        this.y = multiple(point.y, this.z2);
+    }
+
+    public ECC_Point_Chud(ECC_Point_Jacob point){
+        super(point.curve, false);
+        this.x = point.x;
+        this.y = point.y;
+        this.z = point.z;
+        this.z2 = square(this.z);
+        this.z3 = multiple(this.z2, this.z);
+    }
+
+    public ECC_Point_Chud(ECC_Point_ModJacob point){
+        super(point.curve, false);
+        this.x = point.x;
+        this.y = point.y;
+        this.z = point.z;
+        this.z2 = square(this.z);
+        this.z3 = multiple(this.z2, this.z);
+    }
+
+
+
+    // Point Multiplication
+
+    public ECC_Point_Chud doubleAndAdd(BigInteger n){
         ECC_Point_Chud N = this;
         ECC_Point_Chud Q = new ECC_Point_Chud(this.curve);
         String d = n.toString(2);
@@ -36,6 +80,23 @@ public class ECC_Point_Chud extends ECC_Point{
         }
         return Q;
     }
+
+    public ECC_Point_Chud Montgomery(BigInteger n){
+        ECC_Point_Chud R1 = this;
+        ECC_Point_Chud R0 = new ECC_Point_Chud(this.curve);
+        String d = n.toString(2);
+        for(int i = d.length() - 1; i >= 0; i--){
+            if(d.charAt(i) == '0'){
+                R1 = R0.pointAddition(R1);
+                R0 = R0.pointDoubling();
+            }else{
+                R0 = R0.pointAddition(R1);
+                R1 = R1.pointDoubling();
+            }
+        }
+        return R0;
+    }
+
 
     public ECC_Point_Chud pointAddition(ECC_Point_Chud point){
 
@@ -97,7 +158,7 @@ public class ECC_Point_Chud extends ECC_Point{
         BigInteger S = multiple(x1y1_2, new BigInteger("4"));
         BigInteger x1_2 = square(this.x);
         BigInteger z1_4 = square(this.z2);
-        BigInteger az1_4 = multiple(this.curve.a, z1_4);
+        BigInteger az1_4 = multiple(this.curve.getA(), z1_4);
         BigInteger M = add(az1_4, multiple(x1_2, new BigInteger("3")));
         BigInteger M_2 = square(M);
         BigInteger T = add(M_2, (multiple(S, BigInteger.TWO).negate()));

@@ -1,4 +1,6 @@
-package ecc;
+package ecc.Weierstrass;
+
+import ecc.ECC_Point;
 
 import java.math.BigInteger;
 
@@ -8,18 +10,51 @@ public class ECC_Point_Jacob extends ECC_Point {
     BigInteger y;
     BigInteger z;
 
-    public ECC_Point_Jacob(ECC_Curve curve, BigInteger x, BigInteger y, BigInteger z){
+    // Constructors
+
+    public ECC_Point_Jacob(ECC_Curve_Weierstrass curve, BigInteger x, BigInteger y, BigInteger z){
         super(curve, false);
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public ECC_Point_Jacob(ECC_Curve curve){
+    public ECC_Point_Jacob(ECC_Curve_Weierstrass curve){
         super(curve, true);
     }
 
-    public ECC_Point_Jacob pointMultiplication(BigInteger n){
+    public ECC_Point_Jacob(ECC_Point_Aff point){
+        super(point.curve, false);
+        this.x = point.getX();
+        this.y = point.getY();
+        this.z = BigInteger.ONE;
+    }
+
+    public ECC_Point_Jacob(ECC_Point_Proj point){
+        super(point.curve, false);
+        this.x = multiple(point.x, point.z);
+        this.y = multiple(point.y, square(point.z));
+        this.z = point.z;
+    }
+
+    public ECC_Point_Jacob(ECC_Point_Chud point){
+        super(point.curve, false);
+        this.x = point.x;
+        this.y = point.y;
+        this.z = point.z;
+    }
+
+    public ECC_Point_Jacob(ECC_Point_ModJacob point){
+        super(point.curve, false);
+        this.x = point.x;
+        this.y = point.y;
+        this.z = point.z;
+    }
+
+
+    // Point Multiplication
+
+    public ECC_Point_Jacob doubleAndAdd(BigInteger n){
         ECC_Point_Jacob N = this;
         ECC_Point_Jacob Q = new ECC_Point_Jacob(this.curve);
         String d = n.toString(2);
@@ -31,6 +66,23 @@ public class ECC_Point_Jacob extends ECC_Point {
         }
         return Q;
     }
+
+    public ECC_Point_Jacob Montgomery(BigInteger n){
+        ECC_Point_Jacob R1 = this;
+        ECC_Point_Jacob R0 = new ECC_Point_Jacob(this.curve);
+        String d = n.toString(2);
+        for(int i = d.length() - 1; i >= 0; i--){
+            if(d.charAt(i) == '0'){
+                R1 = R0.pointAddition(R1);
+                R0 = R0.pointDoubling();
+            }else{
+                R0 = R0.pointAddition(R1);
+                R1 = R1.pointDoubling();
+            }
+        }
+        return R0;
+    }
+
 
     public ECC_Point_Jacob pointAddition(ECC_Point_Jacob point){
 
@@ -92,7 +144,7 @@ public class ECC_Point_Jacob extends ECC_Point {
         BigInteger S = multiple(x1y1_2, new BigInteger("4"));
         BigInteger x1_2 = square(this.x);
         BigInteger z1_4 = square(square(this.z));
-        BigInteger az1_4 = multiple(this.curve.a, z1_4);
+        BigInteger az1_4 = multiple(this.curve.getA(), z1_4);
         BigInteger M = add(az1_4, multiple(x1_2, new BigInteger("3")));
         BigInteger M_2 = square(M);
         BigInteger T = add(M_2, (multiple(S, BigInteger.TWO).negate()));
