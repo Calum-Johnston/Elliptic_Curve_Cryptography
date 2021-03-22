@@ -1,63 +1,51 @@
 package ecc;
 
-import ecc.Weierstrass.ECC_Curve_Weierstrass;
-
 import java.math.BigInteger;
 
-public abstract class ECC_Point {
+public class ECC_Point {
 
-    ECC_Curve_Weierstrass curve;
     boolean infinity;
+    BigInteger p;
 
-    public ECC_Point(ECC_Curve_Weierstrass curve, boolean infinity){
-        this.curve = curve;
+    public ECC_Point(boolean infinity, BigInteger p){
         this.infinity = infinity;
+        this.p = p;
     }
 
-    // Abstract methods
-    public abstract ECC_Point doubleAndAdd(BigInteger n);
+    // Point Opertions
+    public ECC_Point pointAddition(ECC_Point n){return n;};
 
-    public abstract ECC_Point Montgomery(BigInteger n);
-
-    public abstract ECC_Point pointAddition(ECC_Point point);
+    public ECC_Point pointDoubling(){return null;};
 
 
     // Field arithmetic
     public BigInteger add(BigInteger x, BigInteger y){
-        return x.add(y).mod(curve.getP());
+        return x.add(y).mod(p);
     }
 
     public BigInteger subtract(BigInteger x, BigInteger y){
-        return x.subtract(y).mod(curve.getP());
+        return x.subtract(y).mod(p);
     }
 
     public BigInteger multiple(BigInteger x, BigInteger y){
-        return x.multiply(y).mod(curve.getP());
+        return x.multiply(y).mod(p);
     }
 
     public BigInteger divide(BigInteger x, BigInteger y){
-        BigInteger inverseY = y.modInverse(curve.getP());
-        return x.multiply(inverseY).mod(curve.getP());
+        BigInteger inverseY = y.modInverse(p);
+        return x.multiply(inverseY).mod(p);
     }
 
     public BigInteger inverse(BigInteger x){
-        return x.modInverse(curve.getP());
+        return x.modInverse(p);
     }
 
     public BigInteger square(BigInteger x){
-        return x.pow(2).mod(curve.getP());
+        return x.pow(2).mod(p);
     }
 
 
     // Getters and setters
-    public ECC_Curve_Weierstrass getCurve() {
-        return curve;
-    }
-
-    public void setCurve(ECC_Curve_Weierstrass curve) {
-        this.curve = curve;
-    }
-
     public boolean isInfinity() {
         return infinity;
     }

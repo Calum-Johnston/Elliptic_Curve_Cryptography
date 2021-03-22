@@ -1,4 +1,4 @@
-package ecc;
+package ecc.ECC_Operations;
 
 import java.math.BigInteger;
 

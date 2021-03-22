@@ -1,6 +1,6 @@
 package future;
 
-import ecc.ECC_Signature;
+import ecc.ECC_Operations.ECC_Signature;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;

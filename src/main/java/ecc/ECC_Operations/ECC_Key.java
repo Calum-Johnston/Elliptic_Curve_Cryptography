@@ -1,7 +1,6 @@
-package ecc;
+package ecc.ECC_Operations;
 
-import ecc.Weierstrass.ECC_Curve_Weierstrass;
-import ecc.Weierstrass.ECC_Point_Aff;
+import ecc.ECC_Point;
 
 import java.math.BigInteger;
 import java.util.Random;
@@ -9,15 +8,15 @@ import java.util.Random;
 public class ECC_Key {
 
     BigInteger privateKey;
-    ECC_Point_Aff publicKey;
+    ECC_Point publicKey;
 
-    public ECC_Key(ECC_Curve_Weierstrass curve){
+    public ECC_Key(ECC_Point p, BigInteger N){
         Random rnd = new Random();
-        BigInteger n = curve.getN();
+        BigInteger n = N;
         do{
             privateKey = new BigInteger(n.bitLength(), rnd);
         } while(privateKey.compareTo(n) > 0);
-        publicKey = curve.getG().doubleAndAdd(privateKey);
+        publicKey = Scalar_Multiplication.doubleAndAdd(p, privateKey);
     }
 
     public BigInteger getPrivateKey(){
@@ -28,11 +27,11 @@ public class ECC_Key {
         this.privateKey = privateKey;
     }
 
-    public ECC_Point_Aff getPublicKey(){
+    public ECC_Point getPublicKey(){
         return publicKey;
     }
 
-    public void setPublicKey(ECC_Point_Aff publicKey){
+    public void setPublicKey(ECC_Point publicKey){
         this.publicKey = publicKey;
     }
 

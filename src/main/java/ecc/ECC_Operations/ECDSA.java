@@ -1,19 +1,10 @@
-package ecc;
-
-import ecc.Weierstrass.ECC_Curve_Weierstrass;
-import ecc.Weierstrass.ECC_Point_Aff;
-
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Random;
+package ecc.ECC_Operations;
 
 // https://cryptobook.nakov.com/digital-signatures/ecdsa-sign-verify-messages
 
 public class ECDSA {
 
-    public static ECC_Signature Sign(ECC_Curve_Weierstrass curve, ECC_Key kp, String message){
+   /** public static ECC_Signature Sign(ECC_Curve_Weierstrass curve, ECC_Key kp, String message){
 
         // Select random integer 1 <= k <= n - 1
         Random rnd = new Random();
@@ -33,7 +24,7 @@ public class ECDSA {
         }
 
         // Compute kG = (x1, y1)
-        ECC_Point_Aff kG = curve.getG().doubleAndAdd(k);
+        ECC_Point_Weierstrass_Aff kG = curve.getG().doubleAndAdd(k);
 
         // Computer r = x1 mod n
         BigInteger r = kG.getX().mod(curve.getN());
@@ -73,12 +64,12 @@ public class ECDSA {
         BigInteger u2 = (sig.getR().multiply(w)).mod(curve.getN());
 
         // Compute X = u1G + u2PK
-        ECC_Point_Aff u1G = curve.getG().doubleAndAdd(u1);
-        ECC_Point_Aff u2PK = kp.getPublicKey().doubleAndAdd(u2);
-        ECC_Point_Aff X = u1G.pointAddition(u2PK);
+        ECC_Point_Weierstrass_Aff u1G = curve.getG().doubleAndAdd(u1);
+        ECC_Point_Weierstrass_Aff u2PK = kp.getPublicKey().doubleAndAdd(u2);
+        ECC_Point_Weierstrass_Aff X = u1G.pointAddition(u2PK);
 
         // Check x coordinate of X equals r
         return X.getX().equals(sig.getR());
-    }
+    }*/
 
 }
