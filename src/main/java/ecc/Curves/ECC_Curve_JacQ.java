@@ -1,22 +1,22 @@
 package ecc.Curves;
 
-import ecc.Points.Doche_Icart_Kohel.ECC_Point_DIK2;
-
 import java.math.BigInteger;
 
-public class ECC_Curve_DIK2  {
+public class ECC_Curve_JacQ {
 
     BigInteger p; // field size
     BigInteger a; // a coefficient of the equation
-    ECC_Point_DIK2 G; // Base point
+    BigInteger x; // Base point (s)
+    BigInteger y; // Base point (c)
     BigInteger n; // prime order n of the point G (i.e. n.G = O, where O is point at infinity)
     BigInteger h; // the cofactor of the curve (h = #E(Fp)/n)
 
-    // Curve y^2 = x^3 + ax^2 + 16ax
-    public ECC_Curve_DIK2(BigInteger p, BigInteger a,  BigInteger x, BigInteger y, BigInteger n, BigInteger h){
+    // Curve y^2=x^4+2ax^2+1
+    public ECC_Curve_JacQ(BigInteger p, BigInteger a, BigInteger x, BigInteger y, BigInteger n, BigInteger h){
         this.p = p;
         this.a = a;
-        this.G = new ECC_Point_DIK2(this, x, y, BigInteger.ONE, BigInteger.ONE);
+        this.x = x;
+        this.y = y;;
         this.n = n;
         this.h = h;
     }
@@ -37,12 +37,20 @@ public class ECC_Curve_DIK2  {
         this.a = a;
     }
 
-    public ECC_Point_DIK2 getG(){
-        return G;
+    public BigInteger getX() {
+        return x;
     }
 
-    public void setG(ECC_Point_DIK2 G){
-        this.G = G;
+    public void setX(BigInteger x) {
+        this.x = x;
+    }
+
+    public BigInteger getY() {
+        return y;
+    }
+
+    public void setY(BigInteger y) {
+        this.y = y;
     }
 
     public BigInteger getN(){

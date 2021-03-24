@@ -1,4 +1,4 @@
-package ecc;
+package ecc.Points;
 
 import java.math.BigInteger;
 
@@ -12,10 +12,18 @@ public class ECC_Point {
         this.p = p;
     }
 
-    // Point Opertions
-    public ECC_Point pointAddition(ECC_Point n){return n;};
+    // Point Operations
+    public ECC_Point pointAddition(ECC_Point n){return null;}
 
-    public ECC_Point pointDoubling(){return null;};
+    public ECC_Point mixedAddition(ECC_Point n){return null;}
+
+    public ECC_Point unifiedAddition(ECC_Point n){return null;}
+
+    public ECC_Point pointDoubling(){return null;}
+
+    public ECC_Point negate(){return null;}
+
+    public ECC_Point convertAffine(){return null;}
 
 
     // Field arithmetic

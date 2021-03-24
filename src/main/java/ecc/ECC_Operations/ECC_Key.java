@@ -1,6 +1,6 @@
 package ecc.ECC_Operations;
 
-import ecc.ECC_Point;
+import ecc.Points.ECC_Point;
 
 import java.math.BigInteger;
 import java.util.Random;

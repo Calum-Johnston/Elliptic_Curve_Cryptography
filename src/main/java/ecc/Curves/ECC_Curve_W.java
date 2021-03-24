@@ -1,7 +1,5 @@
 package ecc.Curves;
 
-import ecc.ECC_Point;
-
 import java.math.BigInteger;
 
 public class ECC_Curve_W  {

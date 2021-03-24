@@ -1,8 +1,7 @@
-package ecc.Doche_Icart_Kohel;
+package ecc.Points.Doche_Icart_Kohel;
 
 import ecc.Curves.ECC_Curve_DIK2;
-import ecc.Curves.ECC_Curve_W;
-import ecc.ECC_Point;
+import ecc.Points.ECC_Point;
 
 import java.math.BigInteger;
 
@@ -36,13 +35,6 @@ public class ECC_Point_DIK2 extends ECC_Point {
         // Convert point
         ECC_Point_DIK2 point = (ECC_Point_DIK2) p;
 
-        // Perform required checks
-        if(isInfinity() == true){ // P == O
-            return point;
-        } else if(point.isInfinity() == true){ // Q == O
-            return this;
-        }
-
         // Calculations 12M+5S+1D
         BigInteger A = subtract(multiple(this.y, point.zz), multiple(point.y, this.zz));
         BigInteger AA = square(A);
@@ -65,11 +57,6 @@ public class ECC_Point_DIK2 extends ECC_Point {
 
     public ECC_Point_DIK2 pointDoubling(){
 
-        // Perform required checks
-        if(isInfinity() == true) { // P = O
-            return this;
-        }
-
         // Calculations 2M+5S
         BigInteger A = square(this.x);
         BigInteger U = multiple(multiple(BigInteger.TWO, curve.getA()), this.zz);
@@ -86,6 +73,44 @@ public class ECC_Point_DIK2 extends ECC_Point {
         // Return the calculated value
         return new ECC_Point_DIK2(this.curve, x3, y3, z3, zz3);
     }
+
+    public ECC_Point_DIK2 mixedAddition(ECC_Point p){
+
+        // Convert point
+        ECC_Point_DIK2 point = (ECC_Point_DIK2) p;
+
+        // Computations required 8M+4S+1D
+        BigInteger A = subtract(multiple(point.y, this.zz), this.y);
+        BigInteger AA = square(A);
+        BigInteger B = subtract(multiple(point.x, this.z), this.x);
+        BigInteger C = multiple(B, this.z);
+        BigInteger CC = square(C);
+        BigInteger D = multiple(BigInteger.TWO, multiple(point.x, CC));
+        BigInteger F = multiple(this.x, multiple(B, C));
+        BigInteger z3 = multiple(BigInteger.TWO, CC);
+        BigInteger zz3 = square(z3);
+        BigInteger x3 = subtract(subtract(multiple(BigInteger.TWO, subtract(AA, F)), multiple(curve.getA(), z3)), D);
+        BigInteger y3 = subtract(multiple(subtract(subtract(square(add(A, C)), AA), CC), multiple(D, x3)), multiple(point.y, zz3));
+
+        // Return the calculated value
+        return new ECC_Point_DIK2(this.curve, x3, y3, z3, zz3);
+    }
+
+    public ECC_Point_DIK2 reAddition(ECC_Point p){
+        return pointAddition(p);
+    }
+
+    public ECC_Point_DIK2 negate(){
+        return new ECC_Point_DIK2(this.curve, this.x, this.y.negate(), this.z, this.zz);
+    }
+
+    public ECC_Point_DIK2 convertAffine(){
+        BigInteger z1 = inverse(this.z);
+        BigInteger x1 = multiple(square(z1), this.x);
+        BigInteger y1 = multiple(multiple(z1, square(z1)), this.y);
+        return new ECC_Point_DIK2(curve, x1, y1, BigInteger.ONE, BigInteger.ONE);
+    }
+
 
 
     // Getters and setters

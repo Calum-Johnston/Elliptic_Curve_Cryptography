@@ -30,17 +30,16 @@ public class Curves {
         return new ECC_Curve_W(p, a, b, x, y, n, h);
     }
 
-    public ECC_Curve_W generatePrimeFieldCurve_basic(){
+    public static ECC_Curve_W generatePrimeFieldCurve_basic(){
         BigInteger p = new BigInteger("23");
         BigInteger a = new BigInteger("1");
         BigInteger b = new BigInteger("1");
         BigInteger x = new BigInteger("3");
         BigInteger y = new BigInteger("10");
-        BigInteger n = new BigInteger("28");
+        BigInteger n = new BigInteger("24");
         BigInteger h = new BigInteger("1");
         return new ECC_Curve_W(p, a, b, x, y, n, h);
     }
-
 
 
 }
