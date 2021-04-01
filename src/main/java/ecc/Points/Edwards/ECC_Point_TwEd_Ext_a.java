@@ -5,7 +5,7 @@ import ecc.Points.ECC_Point;
 
 import java.math.BigInteger;
 
-public class ECC_Point_TwEd_Ext extends ECC_Point {
+public class ECC_Point_TwEd_Ext_a extends ECC_Point {
 
     ECC_Curve_Ed curve;
     BigInteger x;
@@ -14,7 +14,7 @@ public class ECC_Point_TwEd_Ext extends ECC_Point {
     BigInteger t;
 
     // Constructors
-    public ECC_Point_TwEd_Ext(ECC_Curve_Ed curve, BigInteger x, BigInteger y, BigInteger z, BigInteger t) {
+    public ECC_Point_TwEd_Ext_a(ECC_Curve_Ed curve, BigInteger x, BigInteger y, BigInteger z, BigInteger t) {
         super(false, curve.getP());
         this.curve = curve;
         this.x = x;
@@ -23,7 +23,7 @@ public class ECC_Point_TwEd_Ext extends ECC_Point {
         this.t = t;
     }
 
-    public ECC_Point_TwEd_Ext(ECC_Curve_Ed curve){
+    public ECC_Point_TwEd_Ext_a(ECC_Curve_Ed curve){
         super(true, null);
         this.curve = curve;
     }
@@ -31,19 +31,19 @@ public class ECC_Point_TwEd_Ext extends ECC_Point {
 
 
     // Point Operations
-    public ECC_Point_TwEd_Ext pointAddition(ECC_Point p){
+    public ECC_Point_TwEd_Ext_a pointAddition(ECC_Point p){
 
         // Convert point
-        ECC_Point_TwEd_Ext point = (ECC_Point_TwEd_Ext) p;
+        ECC_Point_TwEd_Ext_a point = (ECC_Point_TwEd_Ext_a) p;
 
-        // Computations required 9M+1D
-        BigInteger A = multiple(this.x, point.x);
-        BigInteger B = multiple(this.y, point.y);
-        BigInteger C = multiple(this.z, point.t);
-        BigInteger D = multiple(this.t, point.z);
+        // Computations required 8M
+        BigInteger A = multiple(subtract(this.y, this.x), add(point.y, point.x));
+        BigInteger B = multiple(add(this.x, this.y), subtract(point.y, point.x));
+        BigInteger C = multiple(this.z, multiple(BigInteger.TWO, point.t));
+        BigInteger D = multiple(this.t, multiple(BigInteger.TWO, point.z));
         BigInteger E = add(D, C);
-        BigInteger F = subtract(add(multiple(subtract(this.x, this.y), add(point.x, point.y)), B), A);
-        BigInteger G = add(B, multiple(curve.getA(), A));
+        BigInteger F = subtract(B, A);
+        BigInteger G = add(B, A);
         BigInteger H = subtract(D, C);
         BigInteger x3 = multiple(E, F);
         BigInteger y3 = multiple(G, H);
@@ -51,22 +51,22 @@ public class ECC_Point_TwEd_Ext extends ECC_Point {
         BigInteger z3 = multiple(F, G);
 
         // Return the calculated value
-        return new ECC_Point_TwEd_Ext(this.curve, x3, y3, z3, t3);
+        return new ECC_Point_TwEd_Ext_a(this.curve, x3, y3, z3, t3);
     }
 
-    public ECC_Point_TwEd_Ext mixedAddition(ECC_Point p){
+    public ECC_Point_TwEd_Ext_a mixedAddition(ECC_Point p){
 
         // Convert point
-        ECC_Point_TwEd_Ext point = (ECC_Point_TwEd_Ext) p;
+        ECC_Point_TwEd_Ext_a point = (ECC_Point_TwEd_Ext_a) p;
 
-        // Computations required 8M+1D
-        BigInteger A = multiple(this.x, point.x);
-        BigInteger B = multiple(this.y, point.y);
-        BigInteger C = multiple(this.z, point.t);
-        BigInteger D = this.t;
+        // Computations required 7M
+        BigInteger A = multiple(subtract(this.y, this.x), add(point.y, point.x));
+        BigInteger B = multiple(add(this.x, this.y), subtract(point.y, point.x));
+        BigInteger C = multiple(this.z, multiple(BigInteger.TWO, point.t));
+        BigInteger D = multiple(this.t, BigInteger.TWO);
         BigInteger E = add(D, C);
-        BigInteger F = subtract(add(multiple(subtract(this.x, this.y), add(point.x, point.y)), B), A);
-        BigInteger G = add(B, multiple(curve.getA(), A));
+        BigInteger F = subtract(B, A);
+        BigInteger G = add(B, A);
         BigInteger H = subtract(D, C);
         BigInteger x3 = multiple(E, F);
         BigInteger y3 = multiple(G, H);
@@ -74,14 +74,14 @@ public class ECC_Point_TwEd_Ext extends ECC_Point {
         BigInteger z3 = multiple(F, G);
 
         // Return the calculated value
-        return new ECC_Point_TwEd_Ext(this.curve, x3, y3, z3, t3);
+        return new ECC_Point_TwEd_Ext_a(this.curve, x3, y3, z3, t3);
     }
 
-    public ECC_Point_TwEd_Ext reAddition(ECC_Point p){
+    public ECC_Point_TwEd_Ext_a reAddition(ECC_Point p){
         return pointAddition(p);
     }
 
-    public ECC_Point_TwEd_Ext pointDoubling(){
+    public ECC_Point_TwEd_Ext_a pointDoubling(){
 
         // Computations required 4M+4S
         BigInteger A = square(this.x);
@@ -98,42 +98,42 @@ public class ECC_Point_TwEd_Ext extends ECC_Point {
         BigInteger z3 = multiple(F, G);
 
         // Return the calculated value
-        return new ECC_Point_TwEd_Ext(this.curve, x3, y3, z3, t3);
+        return new ECC_Point_TwEd_Ext_a(this.curve, x3, y3, z3, t3);
     }
 
-    public ECC_Point_TwEd_Ext unifiedAddition(ECC_Point p){
+    public ECC_Point_TwEd_Ext_a unifiedAddition(ECC_Point p){
 
         // Convert point
-        ECC_Point_TwEd_Ext point = (ECC_Point_TwEd_Ext) p;
+        ECC_Point_TwEd_Ext_a point = (ECC_Point_TwEd_Ext_a) p;
 
-        // Computations required 9M+1D
-        BigInteger A = multiple(this.x, point.x);
-        BigInteger B = multiple(this.y, point.y);
-        BigInteger C = multiple(this.t, multiple(curve.getD(), point.t));
-        BigInteger D = multiple(this.z, point.z);
-        BigInteger E = subtract(subtract(multiple(add(this.x, this.y), add(point.x, point.y)), A), B);
+        // Computations required 8M+1D
+        BigInteger A = multiple(subtract(this.y, this.x), subtract(point.y, point.x));
+        BigInteger B = multiple(add(this.x, this.y), add(point.y, point.x));
+        BigInteger C = multiple(this.t, multiple(curve.getD(), multiple(BigInteger.TWO, point.t)));
+        BigInteger D = multiple(this.z, multiple(BigInteger.TWO, point.z));
+        BigInteger E = subtract(B, A);
         BigInteger F = subtract(D, C);
         BigInteger G = add(D, C);
-        BigInteger H = subtract(B, multiple(curve.getA(), A));
+        BigInteger H = add(B, A);
         BigInteger x3 = multiple(E, F);
         BigInteger y3 = multiple(G, H);
         BigInteger t3 = multiple(E, H);
         BigInteger z3 = multiple(F, G);
 
         // Return the calculated value
-        return new ECC_Point_TwEd_Ext(this.curve, x3, y3, z3, t3);
+        return new ECC_Point_TwEd_Ext_a(this.curve, x3, y3, z3, t3);
     }
 
-    public ECC_Point_TwEd_Ext negate(){
-        return new ECC_Point_TwEd_Ext(this.curve, this.x.negate(), this.y, this.z, this.t.negate());
+    public ECC_Point_TwEd_Ext_a negate(){
+        return new ECC_Point_TwEd_Ext_a(this.curve, this.x.negate(), this.y, this.z, this.t.negate());
     }
 
-    public ECC_Point_TwEd_Ext convertAffine(){
+    public ECC_Point_TwEd_Ext_a convertAffine(){
         BigInteger z1 = inverse(z);
         BigInteger x1 = multiple(z1, this.x);
         BigInteger y1 = multiple(z1, this.y);
         BigInteger xy1 = multiple(x1, y1);
-        return new ECC_Point_TwEd_Ext(curve, x1, y1, BigInteger.ONE, xy1);
+        return new ECC_Point_TwEd_Ext_a(curve, x1, y1, BigInteger.ONE, xy1);
     }
 
 

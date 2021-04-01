@@ -122,7 +122,7 @@ public class Scalar_Multiplication {
             }
             if(val < 0){
                 if(Q == null){
-                    Q = P.get((int) Math.floor(val / 2));
+                    Q = nP.get((int) Math.floor(val / 2));
                 }else{
                     Q = Q.pointAddition(nP.get((int) Math.floor(Math.abs(val) / 2)));
                 }
@@ -130,6 +130,70 @@ public class Scalar_Multiplication {
         }
         return Q;
     }
+
+
+    // Sliding Window
+    public static ECC_Point slidingWindow(ECC_Point point, BigInteger k, int w){
+        ArrayList<Integer> NAF = NAF(k);
+        ECC_Point Q = null;
+        ArrayList<ECC_Point> P = new ArrayList<>();
+        ArrayList<ECC_Point> nP = new ArrayList<>();
+        int endPoint = (int) (2 * (Math.pow(2, w) - Math.pow(-1, w)))/3;
+        for(int i = 1; i <= endPoint; i+=2){
+            ECC_Point po = doubleAndAdd(point, BigInteger.valueOf(i));
+            P.add(po);
+            nP.add(po.negate());
+        }
+        int i = 0;
+        int t = 0;
+        int u = 0;
+        while(i < NAF.size()){
+            int val = NAF.get(i);
+            if(val == 0){
+                t = 1;
+                u = 0;
+            }else{
+                int startPoint = w - 1;
+                if(i + w - 1 >= NAF.size()){
+                    startPoint = NAF.size() - 1 - i;
+                }
+                for(int j = startPoint; j >= 0; j--){
+                    if(NAF.get(i + j) != 0){ //means its odd
+                        u = 0;
+                        int p = 0;
+                        for(int v = j; v >=0; v--){
+                            u += (Math.pow(2, p) * NAF.get(i+v));
+                            p++;
+                        }
+                        t = j + 1;
+                        break;
+                    }
+                }
+            }
+            if(Q != null){
+                for(int a = 0; a < t; a++){
+                    Q = Q.pointDoubling();
+                }
+            }
+            if(u > 0){
+                if(Q == null){
+                    Q = P.get((int) Math.floor(u / 2));
+                }else{
+                    Q = Q.pointAddition(P.get((int) Math.floor(u / 2)));
+                }
+            }
+            if(u < 0){
+                if(Q == null){
+                    Q = nP.get((int) Math.floor(Math.abs(u) / 2));
+                }else{
+                    Q = Q.pointAddition(nP.get((int) Math.floor(Math.abs(u) / 2)));
+                }
+            }
+            i += t;
+        }
+        return Q;
+    }
+
 
 
     // NAF method (unified)
@@ -140,7 +204,7 @@ public class Scalar_Multiplication {
         ECC_Point Q = null;
         for(Integer val : NAF){
             if(Q != null){
-            Q = Q.unifiedAddition(Q);
+                Q = Q.unifiedAddition(Q);
             }
             if(val == -1){
                 if(Q == null){
@@ -161,6 +225,4 @@ public class Scalar_Multiplication {
     }
 
 
-    // Fixed-base Comb method
-    // public static ECC_Point fixedBase(ECC_Point point, BigInteger k, )
 }

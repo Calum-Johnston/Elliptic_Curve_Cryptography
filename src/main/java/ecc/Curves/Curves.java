@@ -4,32 +4,6 @@ import java.math.BigInteger;
 
 public class Curves {
 
-    // Weierstrass Curves
-
-    // From https://www.ijert.org/research/implementation-of-elliptic-curve-arithmetic-operations-for-prime-field-and-binary-field-using-java-biginteger-class-IJERTV6IS080211.pdf
-    public static ECC_Curve_W Weierstrass_192(){
-        BigInteger p = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFF",16);
-        BigInteger a = new BigInteger("-3");
-        BigInteger b = new BigInteger("64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1",16);
-        BigInteger x = new BigInteger("188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012",16);
-        BigInteger y = new BigInteger("07192b95ffc8da78631011ed6b24cdd573f977a11e794811",16);
-        BigInteger n = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFF99DEF836146BC9B1B4D22831",16);
-        BigInteger h = new BigInteger("1");
-        return new ECC_Curve_W(p, a, b, x, y, n, h);
-    }
-
-    // Potential Curves https://tools.ietf.org/html/rfc5639
-    public ECC_Curve_W generatePrimeFieldCurve(){
-        BigInteger p = new BigInteger("E95E4A5F737059DC60DFC7AD95B3D8139515620F",16);
-        BigInteger a = new BigInteger("340E7BE2A280EB74E2BE61BADA745D97E8F7C300",16);
-        BigInteger b = new BigInteger("1E589A8595423412134FAA2DBDEC95C8D8675E58",16);
-        BigInteger x = new BigInteger("BED5AF16EA3F6A4F62938C4631EB5AF7BDBCDBC3",16);
-        BigInteger y = new BigInteger("1667CB477A1A8EC338F94741669C976316DA6321",16);
-        BigInteger n = new BigInteger("E95E4A5F737059DC60DF5991D45029409E60FC09",16);
-        BigInteger h = new BigInteger("1");
-        return new ECC_Curve_W(p, a, b, x, y, n, h);
-    }
-
     public static ECC_Curve_W generatePrimeFieldCurve_basic(){
         BigInteger p = new BigInteger("23");
         BigInteger a = new BigInteger("1");
@@ -41,5 +15,54 @@ public class Curves {
         return new ECC_Curve_W(p, a, b, x, y, n, h);
     }
 
+    // Weierstrass curve
+    // a = -1
+    public static ECC_Curve_W secp256r1(){
+        BigInteger p = new BigInteger("ffffffff00000001000000000000000000000000ffffffffffffffffffffffff", 16);
+        BigInteger a = new BigInteger("ffffffff00000001000000000000000000000000fffffffffffffffffffffffc", 16);
+        BigInteger b = new BigInteger("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16);
+        BigInteger x = new BigInteger("6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296", 16);
+        BigInteger y = new BigInteger("4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5", 16);
+        BigInteger n = new BigInteger("ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551", 16);
+        BigInteger h = new BigInteger("1");
+        return new ECC_Curve_W(p, a, b, x, y, n, h);
+    }
+
+    // Montgomery curve
+    public static ECC_Curve_Montgomery Curve25519(){
+        BigInteger p = new BigInteger("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed", 16);
+        BigInteger a = new BigInteger("76d06", 16);
+        BigInteger b = new BigInteger("01", 16);
+        BigInteger x = new BigInteger("09", 16);
+        BigInteger y = new BigInteger("20ae19a1b8a086b4e01edd2c7748d14c923d4d7e6d7c61b229e9c5a27eced3d9", 16);
+        BigInteger n = new BigInteger("1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed", 16);
+        BigInteger h = new BigInteger("08");
+        return new ECC_Curve_Montgomery(p, a, b, x, y, n, h);
+    }
+
+    // Edwards Curve
+    // https://link.springer.com/chapter/10.1007/978-3-319-59870-3_19
+    public static ECC_Curve_Ed Ed25519(){
+        BigInteger p = BigInteger.TWO.pow(256).subtract(new BigInteger("90437671211985546874316358605566976675"));
+        BigInteger d = new BigInteger("2232957402930888962690153848203737819511656455704365203613889338415517544966");
+        BigInteger x = new BigInteger("38827631816508813273841327893835794280440756912139095629484251847080307749332");
+        BigInteger y = new BigInteger("45829116834518642034200069292195310273647442070782884666574460125768495421042");
+        BigInteger n = new BigInteger("28948022309329048855892746252171976963294556678555688323048256808032754388119");
+        BigInteger h = new BigInteger("4");
+        return new ECC_Curve_Ed(p, BigInteger.ONE, d, x, y, n, h);
+    }
+
+    // Twisted Edwards Curve https://neuromancer.sk/std/other/Ed25519
+    // a = -1
+    public static ECC_Curve_Ed TwEd25519(){
+        BigInteger p = new BigInteger("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed", 16);
+        BigInteger a = new BigInteger("-1");
+        BigInteger d = new BigInteger("52036cee2b6ffe738cc740797779e89800700a4d4141d8ab75eb4dca135978a3", 16);
+        BigInteger x = new BigInteger("216936D3CD6E53FEC0A4E231FDD6DC5C692CC7609525A7B2C9562D608F25D51A", 16);
+        BigInteger y = new BigInteger("6666666666666666666666666666666666666666666666666666666666666658", 16);
+        BigInteger n = new BigInteger("1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed", 16);
+        BigInteger h = new BigInteger("08", 16);
+        return new ECC_Curve_Ed(p, a, d, x, y, n, h);
+    }
 
 }

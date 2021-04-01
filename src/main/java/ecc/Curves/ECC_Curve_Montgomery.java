@@ -2,19 +2,21 @@ package ecc.Curves;
 
 import java.math.BigInteger;
 
-public class ECC_Curve_DIK3 {
+public class ECC_Curve_Montgomery {
 
     BigInteger p; // field size
     BigInteger a; // a coefficient of the equation
+    BigInteger b; // b coefficient of the equation
     BigInteger x; // Base point (x)
     BigInteger y; // Base point (y)
     BigInteger n; // prime order n of the point G (i.e. n.G = O, where O is point at infinity)
     BigInteger h; // the cofactor of the curve (h = #E(Fp)/n)
 
-    // Curve y^2 = x^3 + ax^2 + 16ax
-    public ECC_Curve_DIK3(BigInteger p, BigInteger a, BigInteger x, BigInteger y, BigInteger n, BigInteger h){
+    // Curve by^2=x^3+ax^2+x
+    public ECC_Curve_Montgomery(BigInteger p, BigInteger a, BigInteger b, BigInteger x, BigInteger y, BigInteger n, BigInteger h){
         this.p = p;
         this.a = a;
+        this.b = b;
         this.x = x;
         this.y = y;
         this.n = n;
@@ -35,6 +37,14 @@ public class ECC_Curve_DIK3 {
 
     public void setA(BigInteger a){
         this.a = a;
+    }
+
+    public BigInteger getB(){
+        return b;
+    }
+
+    public void setB(BigInteger b){
+        this.b = b;
     }
 
     public BigInteger getX() {
