@@ -13,6 +13,10 @@ public class ECC_Point_W_ModJacob extends ECC_Point {
     BigInteger z;
     BigInteger t;
 
+    // Readdition variables
+    BigInteger zz;
+    BigInteger zzz;
+
     // Constructors
     public ECC_Point_W_ModJacob(ECC_Curve_W curve, BigInteger x, BigInteger y, BigInteger z, BigInteger t){
         super(false, curve.getP());
@@ -36,13 +40,22 @@ public class ECC_Point_W_ModJacob extends ECC_Point {
         // Convert point
         ECC_Point_W_ModJacob point = (ECC_Point_W_ModJacob) p;
 
-        // Computations required 11M+7S
-        BigInteger zz1 = square(this.z);
-        BigInteger zz2 = square(point.z);
-        BigInteger u1 = multiple(this.x, zz2);
-        BigInteger u2 = multiple(point.x, zz1);
-        BigInteger s1 = multiple(this.y, multiple(point.z, zz2));
-        BigInteger s2 = multiple(point.y, multiple(this.z, zz1));
+        // Computations required 11M+7S (10M+6S readdition)
+        // Computations required 11M+5S
+        if(!this.isAdded()){
+            zz = square(this.z);
+            zzz = multiple(this.z, zz);
+            this.setAdded(true);
+        }
+        if(!point.isAdded()){
+            point.zz = square(point.z);
+            point.zzz = multiple(point.z, point.zz);
+            point.setAdded(true);
+        }
+        BigInteger u1 = multiple(this.x, point.zz);
+        BigInteger u2 = multiple(point.x, this.zz);
+        BigInteger s1 = multiple(this.y, point.zzz);
+        BigInteger s2 = multiple(point.y, this.zzz);
         BigInteger H = subtract(u2, u1);
         BigInteger I = square(multiple(BigInteger.TWO, H));
         BigInteger J = multiple(H, I);
@@ -50,7 +63,7 @@ public class ECC_Point_W_ModJacob extends ECC_Point {
         BigInteger V = multiple(u1, I);
         BigInteger x3 = subtract(subtract(square(r), J), multiple(BigInteger.TWO, V));
         BigInteger y3 = subtract(multiple(r, subtract(V, x3)), multiple(BigInteger.TWO, multiple(s1, J)));
-        BigInteger z3 = multiple(subtract(subtract(square(add(this.z, point.z)), zz1), zz2), H);
+        BigInteger z3 = multiple(subtract(subtract(square(add(this.z, point.z)), this.zz), point.zz), H);
         BigInteger zz3 = square(z3);
         BigInteger t3 = multiple(curve.getA(), square(zz3));
 
@@ -79,10 +92,6 @@ public class ECC_Point_W_ModJacob extends ECC_Point {
 
         // Return the calculated value
         return new ECC_Point_W_ModJacob(this.curve, x3, y3, z3, t3);
-    }
-
-    public ECC_Point_W_ModJacob reAddition(ECC_Point p){
-        return pointAddition(p);
     }
 
     public ECC_Point_W_ModJacob pointDoubling(){

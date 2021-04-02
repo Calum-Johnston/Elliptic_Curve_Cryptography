@@ -75,10 +75,6 @@ public class ECC_Point_W_Proj_a extends ECC_Point {
         return new ECC_Point_W_Proj_a(this.curve, Rx, Ry, Rz);
     }
 
-    public ECC_Point_W_Proj_a reAddition(ECC_Point p){
-        return pointAddition(p);
-    }
-
     public ECC_Point_W_Proj_a pointDoubling(){
 
         // Computations required 7M+3S

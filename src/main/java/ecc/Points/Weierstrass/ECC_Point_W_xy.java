@@ -42,6 +42,36 @@ public class ECC_Point_W_xy extends ECC_Point {
         return new ECC_Point_W_xy(this.curve, x3, z3);
     }
 
+    public ECC_Point_W_xy diffAddition(ECC_Point p, ECC_Point d){
+
+        // Convert point
+        ECC_Point_W_xy point = (ECC_Point_W_xy) p;
+        ECC_Point_W_xy diff = (ECC_Point_W_xy) d;
+
+        // Computations required 7M+2S+2D
+        BigInteger T1 = multiple(point.x, diff.x);
+        BigInteger T2 = multiple(point.z, diff.z);
+        BigInteger T3 = multiple(point.x, diff.z);
+        BigInteger T4 = multiple(point.z, diff.x);
+        BigInteger T5 = multiple(curve.getA(), T2);
+        BigInteger T6 = subtract(T1, T5);
+        BigInteger T7 = square(T6);
+        BigInteger T8 = multiple(curve.getB(), T2);
+        BigInteger T9 = multiple(new BigInteger("4"), T8);
+        BigInteger T10 = add(T3, T4);
+        BigInteger T11 = multiple(T9, T10);
+        BigInteger T12 = subtract(T7, T11);
+        BigInteger x4 = multiple(this.z, T12);
+        BigInteger T13 = subtract(T3, T4);
+        BigInteger T14 = square(T13);
+        BigInteger z4 = multiple(this.x, T14);
+
+        // Return the calculated value
+        return new ECC_Point_W_xy(this.curve, x4, z4);
+
+    }
+
+
 
 
     // Getters and setters

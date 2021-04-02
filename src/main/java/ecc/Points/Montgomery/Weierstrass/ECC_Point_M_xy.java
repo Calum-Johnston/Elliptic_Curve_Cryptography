@@ -2,6 +2,7 @@ package ecc.Points.Montgomery.Weierstrass;
 
 import ecc.Curves.ECC_Curve_W;
 import ecc.Points.ECC_Point;
+import ecc.Points.Weierstrass.ECC_Point_W_xy;
 
 import java.math.BigInteger;
 
@@ -40,6 +41,26 @@ public class ECC_Point_M_xy extends ECC_Point {
 
         // Return the calculated value
         return new ECC_Point_M_xy(this.curve, x3, z3);
+    }
+
+    public ECC_Point_M_xy diffAddition(ECC_Point p, ECC_Point d){
+
+        // Convert point
+        ECC_Point_M_xy point = (ECC_Point_M_xy) p;
+        ECC_Point_M_xy diff = (ECC_Point_M_xy) d;
+
+        // Computations required 4M+2S
+        BigInteger A = add(point.x, point.z);
+        BigInteger B = subtract(point.x, point.z);
+        BigInteger C = add(diff.x, diff.z);
+        BigInteger D = subtract(diff.x, diff.z);
+        BigInteger DA = multiple(D, A);
+        BigInteger CB = multiple(C, B);
+        BigInteger x4 = multiple(this.z, square(add(DA, CB)));
+        BigInteger z4 = multiple(this.x, square(subtract(DA, CB)));
+
+        // Return the calculated value
+        return new ECC_Point_M_xy(this.curve, x4, z4);
     }
 
 

@@ -5,11 +5,13 @@ import java.math.BigInteger;
 public class ECC_Point {
 
     boolean infinity;
+    boolean added;
     BigInteger p;
 
     public ECC_Point(boolean infinity, BigInteger p){
         this.infinity = infinity;
         this.p = p;
+        added = false;
     }
 
     // Point Operations
@@ -60,5 +62,13 @@ public class ECC_Point {
 
     public void setInfinity(boolean infinity) {
         this.infinity = infinity;
+    }
+
+    public boolean isAdded() {
+        return added;
+    }
+
+    public void setAdded(boolean added) {
+        this.added = added;
     }
 }

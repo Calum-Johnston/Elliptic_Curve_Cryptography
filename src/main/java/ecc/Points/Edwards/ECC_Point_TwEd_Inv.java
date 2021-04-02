@@ -70,10 +70,6 @@ public class ECC_Point_TwEd_Inv extends ECC_Point {
         return new ECC_Point_TwEd_Inv(this.curve, x3, y3, z3);
     }
 
-    public ECC_Point_TwEd_Inv reAddition(ECC_Point p){
-        return pointAddition(p);
-    }
-
     public ECC_Point_TwEd_Inv pointDoubling(){
 
         // Computations required 3M+4S+2D

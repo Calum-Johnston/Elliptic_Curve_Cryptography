@@ -12,6 +12,10 @@ public class ECC_Point_W_Jacob_a extends ECC_Point {
     BigInteger y;
     BigInteger z;
 
+    // Readdition variables
+    BigInteger zz;
+    BigInteger zzz;
+
     // Constructors
     public ECC_Point_W_Jacob_a(ECC_Curve_W curve, BigInteger x, BigInteger y, BigInteger z){
         super(false, curve.getP());
@@ -35,12 +39,21 @@ public class ECC_Point_W_Jacob_a extends ECC_Point {
         ECC_Point_W_Jacob_a point = (ECC_Point_W_Jacob_a) p;
 
         // Computations required 11M+5S
-        BigInteger z1z1 = square(this.z);
-        BigInteger z2z2 = square(point.z);
-        BigInteger u1 = multiple(this.x, z2z2);
-        BigInteger u2 = multiple(point.x, z1z1);
-        BigInteger s1 = multiple(this.y, multiple(point.z, z2z2));
-        BigInteger s2 = multiple(point.y, multiple(this.z, z1z1));
+        // Computations required 11M+5S
+        if(!this.isAdded()){
+            zz = square(this.z);
+            zzz = multiple(this.z, zz);
+            this.setAdded(true);
+        }
+        if(!point.isAdded()){
+            point.zz = square(point.z);
+            point.zzz = multiple(point.z, point.zz);
+            point.setAdded(true);
+        }
+        BigInteger u1 = multiple(this.x, point.zz);
+        BigInteger u2 = multiple(point.x, this.zz);
+        BigInteger s1 = multiple(this.y, point.zzz);
+        BigInteger s2 = multiple(point.y, this.zzz);
         BigInteger h = subtract(u2, u1);
         BigInteger i = square(multiple(BigInteger.TWO, h));
         BigInteger j = multiple(h, i);
@@ -48,7 +61,7 @@ public class ECC_Point_W_Jacob_a extends ECC_Point {
         BigInteger V = multiple(u1, i);
         BigInteger Rx = subtract(subtract(square(r), j), multiple(BigInteger.TWO, V));
         BigInteger Ry = subtract(multiple(r, subtract(V, Rx)), multiple(BigInteger.TWO, multiple(s1, j)));
-        BigInteger Rz = multiple(subtract(subtract(square(add(this.z, point.z)), z1z1), z2z2), h);
+        BigInteger Rz = multiple(subtract(subtract(square(add(this.z, point.z)), this.zz), point.zz), h);
 
         // Return the calculated value
         return new ECC_Point_W_Jacob_a(this.curve, Rx, Ry, Rz);
@@ -75,10 +88,6 @@ public class ECC_Point_W_Jacob_a extends ECC_Point {
 
         // Return the calculated value
         return new ECC_Point_W_Jacob_a(this.curve, Rx, Ry, Rz);
-    }
-
-    public ECC_Point_W_Jacob_a reAddition(ECC_Point p){
-        return pointAddition(p);
     }
 
     public ECC_Point_W_Jacob_a pointDoubling(){
