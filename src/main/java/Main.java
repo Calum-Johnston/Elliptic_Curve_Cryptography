@@ -1,8 +1,4 @@
-import ecc.Curves.Curves;
-import ecc.Curves.ECC_Curve_W;
-import ecc.Points.ECC_Point;
-import ecc.Points.Weierstrass.ECC_Point_W_Jacob;
-import ecc.Points.Weierstrass.ECC_Point_W_Proj;
+import ecc.ECC_Operations.Scalar_Multiplication;
 
 import java.math.BigInteger;
 
@@ -14,47 +10,14 @@ public class Main {
     }
 
     public void generateSpeeds(){
-        // Weierstrass
-        ECC_Curve_W curve_w = Curves.secp256r1();
+        int q = 7;
+        int w0 = (int) Math.floor(((Math.log(q) / Math.log(2)) + 2));
+        int r = q - (int) Math.pow(2, w0-2);
+        double w1 = r/Math.pow(2, w0-2);
 
-        long startTime;
-        long endTime;
-
-        ECC_Point point = new ECC_Point_W_Jacob(curve_w, curve_w.getX(), curve_w.getY(), BigInteger.ONE);
-        ECC_Point point2 = new ECC_Point_W_Jacob(curve_w, curve_w.getX(), curve_w.getY(), BigInteger.ONE);
-
-        startTime = System.nanoTime();
-        point.pointAddition(point2);
-        endTime = System.nanoTime();
-        System.out.println(startTime + " " + endTime);
-        System.out.println("Weierstrass Jacobian Doubling: " + ((endTime-startTime)));
-
-        System.gc();
-
-        startTime = System.nanoTime();
-        point.pointAddition(point2);
-        endTime = System.nanoTime();
-        System.out.println(startTime + " " + endTime);
-        System.out.println("Weierstrass Jacobian Doubling: " + ((endTime-startTime)));
-
-        System.gc();
-
-        point = new ECC_Point_W_Jacob(curve_w, curve_w.getX(), curve_w.getY(), BigInteger.ONE);
-        point2 = new ECC_Point_W_Jacob(curve_w, curve_w.getX(), curve_w.getY(), BigInteger.ONE);
-        startTime = System.nanoTime();
-        point.pointAddition(point2);
-        endTime = System.nanoTime();
-        System.out.println(startTime + " " + endTime);
-        System.out.println("Weierstrass Jacobian Doubling: " + ((endTime-startTime)));
-
-        System.gc();
-
-        startTime = System.nanoTime();
-        point.pointAddition(point2);
-        endTime = System.nanoTime();
-        System.out.println(startTime + " " + endTime);
-        System.out.println("Weierstrass Jacobian Doubling: " + ((endTime-startTime)));
-
+        BigInteger temp = new BigInteger("11101001100100010101110101010111", 2);
+        System.out.println(Scalar_Multiplication.wNOF(temp, w0));
+        System.out.println(Scalar_Multiplication.fractwNOF(temp, w0, w1));
 
     }
 
